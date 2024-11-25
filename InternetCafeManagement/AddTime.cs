@@ -23,7 +23,7 @@ namespace InternetCafeManagement
         public int oturum_suresi { get; set; }
         private void AddTime_Load(object sender, EventArgs e)
         {
-
+            //burada kullanıcı dakika arttırmak isterse dakika arttıracak.
         }
     }
 }
