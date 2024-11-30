@@ -22,7 +22,15 @@ namespace InternetCafeManagement
 
         private void AnaSayfa_Load(object sender, EventArgs e)
         {
-         
+            if(user_role== "Admin")
+            {
+                picAdmin.Visible = true;
+
+            }
+            else
+            {
+                picAdmin.Visible=false;
+            }
         }
 
         private void SessionBox_Click(object sender, EventArgs e)
@@ -81,6 +89,15 @@ namespace InternetCafeManagement
             Admin.balance = user_balance;
             Admin.Show();
             this.Hide();
+        }
+
+        private void pictureBox5_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
         }
     }
 }

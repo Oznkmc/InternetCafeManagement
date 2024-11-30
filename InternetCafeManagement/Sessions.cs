@@ -84,329 +84,148 @@ namespace InternetCafeManagement
         }
         private void picturePC1_Click(object sender, EventArgs e)
         {
-            
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
-                
 
-                
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC1' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC1.Text;
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC1.Text;
 
-                customInputSession.Show();
-                
-                this.Hide();
-                 
+            customInputSession.Show();
 
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC3_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC3.Text;
+            customInputSession.Show();
 
+            this.Hide();
 
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC3' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC3.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
         }
 
         private void picturePC4_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC4.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC4' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC4.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC5_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
-
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC5' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC5.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC5.Text;
+            customInputSession.Show();
+            this.Hide();
         }
 
         private void picturePC6_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC6.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC6' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC6.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC7_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC7.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC7' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC7.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC8_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC8.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC8' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC8.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC9_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC9.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC9' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC9.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC10_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC10.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC10' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC10.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC11_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC11.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC11' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC11.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC12_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC12.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC12' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC12.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void picturePC2_Click(object sender, EventArgs e)
         {
-            UsersSession usersSession = new UsersSession();
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                //picturePC1.Enabled = false;
-                //picturePC2.BackColor = Color.Gray;
-                connection.Open();
+            CustomInputSession customInputSession = new CustomInputSession();
+            customInputSession.user_role = user_role;
+            customInputSession.user_mail = user_mail;
+            customInputSession.user_balance = user_balance;
+            customInputSession.secili_pc = lblPC2.Text;
+            customInputSession.Show();
 
-
-
-                SqlCommand command = new SqlCommand("Update computers SET status='unavailable' where name='PC2' ", connection);
-                command.ExecuteNonQuery();
-                CustomInputSession customInputSession = new CustomInputSession();
-                customInputSession.user_role = user_role;
-                customInputSession.user_mail = user_mail;
-                customInputSession.user_balance = user_balance;
-                customInputSession.secili_pc = lblPC2.Text;
-                customInputSession.Show();
-
-                this.Hide();
-
-
-
-                connection.Close();
-            }
+            this.Hide();
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)

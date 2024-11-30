@@ -23,10 +23,10 @@ namespace InternetCafeManagement
         public double user_balance { get; set; }
         public string secili_pc { get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
+
         private void CustomInputSession_Load(object sender, EventArgs e)
         {
-
-
+            // Yükleme işlemi varsa buraya eklenebilir
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
@@ -41,80 +41,166 @@ namespace InternetCafeManagement
                 sessions.Show();
                 this.Hide();
             }
-
         }
-        public int oturumsuresi;
+
+        public int oturumSuresi;
+
         private void pictureBox1_Click(object sender, EventArgs e)
         {
+            string inputText = txtInput.Text.ToLower();
 
-            if (txtInput.Text.ToLower() == "sınırsız")
-            {
-                 oturumsuresi = 99999;
-                DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (result == DialogResult.Yes)
-                {
-                    UsersSession usersSession = new UsersSession
-                    {
-                        oturum_suresi = oturumsuresi,
-                        user_role = this.user_role,
-                        user_mail = this.user_mail,
-                        user_balance = this.user_balance,
-                        secili_pc = this.secili_pc
-                    };
-                    usersSession.Show();
-                    this.Hide();
-                }
-            }
+            // "Sınırsız" oturum
+            //if (inputText == "sınırsız")
+            //{
+            //    if (user_balance >= 7.5)
+            //    {
+            //        oturumSuresi = 99999;
+            //        DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            //        if (result == DialogResult.Yes)
+            //        {
+            //            // Veritabanında bilgisayar durumunu "unavailable" olarak güncelle
+            //            UpdateComputerStatus("unavailable");
 
-            else if (int.TryParse(txtInput.Text, out int oturumsuresi) && oturumsuresi > 0)
+            //            // Oturum başlatma
+            //            UsersSession usersSession = new UsersSession
+            //            {
+            //                oturum_suresi = oturumSuresi,
+            //                user_role = this.user_role,
+            //                user_mail = this.user_mail,
+            //                user_balance = this.user_balance,
+            //                secili_pc = this.secili_pc
+            //            };
+            //            usersSession.Show();
+            //            this.Hide();
+            //        }
+            //    }
+            //    else
+            //    {
+            //        // Yetersiz bakiye durumunda
+            //        MessageBox.Show("Lütfen Geçerli Bakiye Girin.");
+            //        txtInput.Clear();
+            //        DialogResult result2 = MessageBox.Show("Bakiye Sayfasına Yönlendirilmek İster Misin?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            //        if (result2 == DialogResult.Yes)
+            //        {
+            //            // Bilgisayar durumunu "available" yap
+            //            UpdateComputerStatus("available");
+
+            //            // Balance sayfasına yönlendir
+            //            Balance balance = new Balance
+            //            {
+            //                userbalance = this.user_balance,
+            //                usermail = this.user_mail,
+            //                userrole = this.user_role
+            //            };
+            //            balance.Show();
+            //            this.Hide();
+            //        }
+            //    }
+            //}
+            // Süreli oturum
+             if (int.TryParse(txtInput.Text, out int parsedOturumSuresi) && parsedOturumSuresi > 0)
             {
-                if ((oturumsuresi * 0.25) < user_balance)
+                if (parsedOturumSuresi >= 0)
                 {
-                    DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (result == DialogResult.Yes)
+                    double requiredBalance = parsedOturumSuresi * 0.25;
+                    if (user_balance >= requiredBalance)
                     {
-                        UsersSession usersSession = new UsersSession
+                        DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result == DialogResult.Yes)
                         {
-                            oturum_suresi = oturumsuresi,
-                            user_role = this.user_role,
-                            user_mail = this.user_mail,
-                            user_balance = this.user_balance,
-                            secili_pc = this.secili_pc
-                        };
-                        usersSession.Show();
-                        this.Hide();
+                            oturumSuresi = parsedOturumSuresi;
+
+                            // Oturum başlatma
+                            UsersSession usersSession = new UsersSession
+                            {
+                                oturum_suresi = oturumSuresi,
+                                user_role = this.user_role,
+                                user_mail = this.user_mail,
+                                user_balance = this.user_balance,
+                                secili_pc = this.secili_pc
+                            };
+                            usersSession.Show();
+                            this.Hide();
+                        }
                     }
-                }
-                else
-                {
-                    MessageBox.Show("Lütfen Geçerli Bakiye Girin.");
-                    txtInput.Clear();
-                    DialogResult result2 = MessageBox.Show("Bakiye Sayfasına Yönlendirilmek İster Misin?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (result2 == DialogResult.Yes)
+                    else
                     {
-                        using (SqlConnection connection = new SqlConnection(connectionString))
+                        MessageBox.Show("Yetersiz bakiye.");
+                        DialogResult result2 = MessageBox.Show("Bakiye Sayfasına Yönlendirilmek İster Misin?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result2 == DialogResult.Yes)
                         {
-                            connection.Open();
-                            SqlCommand command = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @secilipc", connection);
-                            command.Parameters.AddWithValue("@secilipc", secili_pc);
-                            command.ExecuteNonQuery();
+                            // Balance sayfasına yönlendir
                             Balance balance = new Balance
                             {
                                 userbalance = this.user_balance,
                                 usermail = this.user_mail,
                                 userrole = this.user_role
                             };
-                            connection.Close();
                             balance.Show();
                             this.Hide();
                         }
                     }
                 }
+                else
+                {
+                    MessageBox.Show("Oturum süresi en az 30 dakika olmalı.");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Geçerli bir değer girin.");
             }
         }
-              
 
+        // Veritabanında bilgisayar durumunu güncelleyen fonksiyon
+        private void UpdateComputerStatus(string status)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("UPDATE computers SET status = @status WHERE name = @secilipc", connection);
+                    command.Parameters.AddWithValue("@status", status);
+                    command.Parameters.AddWithValue("@secilipc", secili_pc);
+                    command.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Hatanızın Nedeni: " + ex.Message);
+                }
             }
         }
-    
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Oturum Menüsüne Dönmeye Emin Misin?");
+            if(result==DialogResult.Yes)
+            {
+                Sessions sessions = new Sessions();
+                sessions.user_balance = this.user_balance;
+                sessions.user_mail = this.user_mail;
+                sessions.user_role = this.user_role;
+                sessions.Show();
+                this.Hide();
+            }
+           
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
+               
+        }
+    }
+}
+
+
+
+
+
 

@@ -213,52 +213,61 @@ namespace InternetCafeManagement
                     }
 
                     // Diğer kontrolleri yapalım
-                    if (txtPassword.Text == txtAgainPassword.Text && txtphone.Text.Length == 12 || txtphone.Text.Length==10 &&
-                        !string.IsNullOrEmpty(txtName.Text.Trim()) && !string.IsNullOrEmpty(txtLastName.Text.Trim()) &&
-                        !string.IsNullOrEmpty(txtPassword.Text.Trim()) && !string.IsNullOrEmpty(txtMail.Text.Trim()) &&
-                        !string.IsNullOrEmpty(txtphone.Text.Trim()) && mailsyntax==true)
+                    if (txtPassword.Text.Length >= 4)
                     {
-                        // Kullanıcıyı veritabanına ekleyelim
-                        SqlCommand sqlkomut = new SqlCommand("INSERT INTO users(firstname, lastname, password, email, phonenumber) " +
-                                                             "VALUES (@userFirstname, @userLastname, @userPassword, @userMail, @userPhonenumber)", connection);
-                        sqlkomut.Parameters.AddWithValue("@userFirstname", txtName.Text);
-                        sqlkomut.Parameters.AddWithValue("@userLastname", txtLastName.Text);
-                        sqlkomut.Parameters.AddWithValue("@userPassword", txtPassword.Text);
-                        sqlkomut.Parameters.AddWithValue("@userMail", txtMail.Text);
-                        sqlkomut.Parameters.AddWithValue("@userPhonenumber", txtphone.Text);
 
-                        sqlkomut.ExecuteNonQuery();
-                        MessageBox.Show("Kullanıcı başarıyla eklendi!");
 
-                        // Formu temizleyelim
-                        txtName.Clear();
-                        txtLastName.Clear();
-                        txtPassword.Clear();
-                        txtAgainPassword.Clear();
-                        txtMail.Clear();
-                        txtphone.Clear();
-                        connection.Close();
-                        DialogResult result2 = MessageBox.Show("Ana Sayfaya Dönmek İster Misin?", "Üye Kayıt İşlem Formu", MessageBoxButtons.YesNo);
-                        if (result2 == DialogResult.Yes)
+                        if (txtPassword.Text == txtAgainPassword.Text && txtphone.Text.Length == 12 || txtphone.Text.Length == 10 &&
+                            !string.IsNullOrEmpty(txtName.Text.Trim()) && !string.IsNullOrEmpty(txtLastName.Text.Trim()) &&
+                            !string.IsNullOrEmpty(txtPassword.Text.Trim()) && !string.IsNullOrEmpty(txtMail.Text.Trim()) &&
+                            !string.IsNullOrEmpty(txtphone.Text.Trim()) && mailsyntax == true)
                         {
-                            ÜyeGirisPaneli üyeGirisPaneli=new ÜyeGirisPaneli();
-                            üyeGirisPaneli.Show();
-                            this.Close();
+                            // Kullanıcıyı veritabanına ekleyelim
+                            SqlCommand sqlkomut = new SqlCommand("INSERT INTO users(firstname, lastname, password, email, phonenumber) " +
+                                                                 "VALUES (@userFirstname, @userLastname, @userPassword, @userMail, @userPhonenumber)", connection);
+                            sqlkomut.Parameters.AddWithValue("@userFirstname", txtName.Text);
+                            sqlkomut.Parameters.AddWithValue("@userLastname", txtLastName.Text);
+                            sqlkomut.Parameters.AddWithValue("@userPassword", txtPassword.Text);
+                            sqlkomut.Parameters.AddWithValue("@userMail", txtMail.Text);
+                            sqlkomut.Parameters.AddWithValue("@userPhonenumber", txtphone.Text);
+
+                            sqlkomut.ExecuteNonQuery();
+                            MessageBox.Show("Kullanıcı başarıyla eklendi!");
+
+                            // Formu temizleyelim
+                            txtName.Clear();
+                            txtLastName.Clear();
+                            txtPassword.Clear();
+                            txtAgainPassword.Clear();
+                            txtMail.Clear();
+                            txtphone.Clear();
+                            connection.Close();
+                            DialogResult result2 = MessageBox.Show("Ana Sayfaya Dönmek İster Misin?", "Üye Kayıt İşlem Formu", MessageBoxButtons.YesNo);
+                            if (result2 == DialogResult.Yes)
+                            {
+                                ÜyeGirisPaneli üyeGirisPaneli = new ÜyeGirisPaneli();
+                                üyeGirisPaneli.Show();
+                                this.Close();
+                            }
+
+
                         }
-
-
+                        else if (txtphone.Text.Length != 12 || txtphone.Text.Length != 10)
+                        {
+                            MessageBox.Show("Telefon numarası 10 haneli olmalıdır!");
+                        }
+                        else if (txtPassword.Text != txtAgainPassword.Text)
+                        {
+                            MessageBox.Show("Şifreler uyuşmuyor!");
+                        }
+                        else if (mailsyntax == false)
+                        {
+                            MessageBox.Show("Mailinizi doğru girdiğinizden emin olun.");
+                        }
                     }
-                    else if (txtphone.Text.Length != 12|| txtphone.Text.Length!=10)
+                    else
                     {
-                        MessageBox.Show("Telefon numarası 10 haneli olmalıdır!");
-                    }
-                    else if (txtPassword.Text != txtAgainPassword.Text)
-                    {
-                        MessageBox.Show("Şifreler uyuşmuyor!");
-                    }
-                   else if(mailsyntax==false)
-                    {
-                        MessageBox.Show("Mailinizi doğru girdiğinizden emin olun.");
+                        MessageBox.Show("Şifreniz En Az Dört Karakterli Olmalı...");
                     }
                 }
             }

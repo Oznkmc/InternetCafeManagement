@@ -32,8 +32,11 @@ namespace InternetCafeManagement
 
         private void pictureBox3_Click(object sender, EventArgs e)
         {
-
-            Application.Exit();
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
