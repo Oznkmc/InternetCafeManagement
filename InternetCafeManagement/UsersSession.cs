@@ -25,10 +25,11 @@ namespace InternetCafeManagement
         public int oturum_suresi {  get; set; }
         private DateTime start_time { get; set; }
         private DateTime end_time { get; set; }
-        public double sessionBalance = 0;
-        public int dakika = 0;
+        public double sessionBalance;
+        public int dakika;
         public int saniye = 0;
         public int saniye2 = 0;
+        public bool dakikasifirla {  get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
         private void pictureBox2_Click(object sender, EventArgs e)
         {
@@ -164,8 +165,9 @@ namespace InternetCafeManagement
             label1.Text += " "+user_mail;
             label2.Text +=" "+ secili_pc;
             label5.Text  = "Dakika: 0 Saniye:0";
-            lblSessionCount.Text = "0";
+            lblSessionCount.Text +=sessionBalance;
             oturum_suresi = oturum_suresi * 60;
+
             timer1.Start();
             start_time = DateTime.Now;
             
@@ -189,20 +191,26 @@ namespace InternetCafeManagement
                 // Eğer saniye 60'a ulaştıysa, dakikayı arttırıyoruz.
                 if (saniye % 60 == 0)
                 {
+                    
                     dakika++;  // Dakikayı arttır
                                // Ekranda dakika ve saniye bilgilerini güncelle
                     label5.Text = "Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
                     saniye2 = 0;
                     // Oturum süresi her dakika başında ekleniyor (örneğin 0.25) ve label'a yazdırılıyor.
-                    sessionBalance = (dakika*0.25f);
-                    lblSessionCount.Text = "Oturum Süresi: " + sessionBalance.ToString();
+                    sessionBalance += (dakika*0.25f);
+                    lblSessionCount.Text += "Oturum Süresi: " + sessionBalance.ToString();
                 }
 
                 // Eğer dakika 60'a ulaştıysa, saati arttırıyoruz.
                 if (dakika == 60)
                 {
                     saat++;  // Saati arttır
-                    dakika = 0;  // Dakikayı sıfırla
+                    if (dakikasifirla == true)
+                    {
+
+
+                        dakika = 0;  // Dakikayı sıfırla
+                    }
                     saniye2 = 0;             // Ekranda saat, dakika ve saniye bilgilerini güncelle
                     label5.Text = "Saat: " + saat.ToString() + " Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
                 }
@@ -353,7 +361,7 @@ namespace InternetCafeManagement
                 user_mail = user_mail,
                 user_role = user_role,
                 oturum_suresi = lasttime,
-                oturum_ucret = sessionBalance,
+                session_balance = this.sessionBalance,
             };
             timer1.Stop();
             add.Show();

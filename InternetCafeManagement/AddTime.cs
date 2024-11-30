@@ -19,6 +19,7 @@ namespace InternetCafeManagement
         public string user_role { get; set; }
         public string user_mail { get; set; }
         public double user_balance { get; set; }
+        public double session_balance { get; set; }
         public string secili_pc { get; set; }
         public int oturum_suresi { get; set; }
         public double oturum_ucret { get; set; }
@@ -47,7 +48,10 @@ namespace InternetCafeManagement
                     user_balance = user_balance,
                     user_mail = user_mail,
                     user_role = user_role,
-                    oturum_suresi = toplamzaman
+                    oturum_suresi = toplamzaman,
+                    sessionBalance=this.session_balance,
+                    
+                    
                 };
                 usersSession.Show();
                 this.Hide();
