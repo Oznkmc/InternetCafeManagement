@@ -86,47 +86,38 @@ namespace InternetCafeManagement
             DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
             if (result == DialogResult.Yes)
             {
-
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-
                     try
                     {
                         string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
                         string endTimeString = end_time.ToString("yyyy-MM-dd HH:mm:ss");
+
                         connection.Open();
+
+                        // Bilgisayar durumu güncelleme
                         SqlCommand command = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @secilipc", connection);
                         command.Parameters.AddWithValue("@secilipc", secili_pc);
                         command.ExecuteNonQuery();
+
                         timer1.Stop();
-                        // user_id alma
-                        SqlCommand userIdCommand = new SqlCommand(
-                            "SELECT user_id FROM users WHERE email = @UserMail",
-                            connection);
+
+                        // Kullanıcı ID alma
+                        SqlCommand userIdCommand = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
                         userIdCommand.Parameters.AddWithValue("@UserMail", user_mail);
                         object userIdResult = userIdCommand.ExecuteScalar();
-                        int userId = 0;
-                        if (userIdResult != null)
-                        {
-                            userId = Convert.ToInt32(userIdResult);
-                        }
+                        int userId = userIdResult != DBNull.Value ? Convert.ToInt32(userIdResult) : 0;
 
-                        // computer_id alma
-                        SqlCommand computerIdCommand = new SqlCommand(
-                            "SELECT computer_id FROM computers WHERE name = @SelectedPC",
-                            connection);
+                        // Bilgisayar ID alma
+                        SqlCommand computerIdCommand = new SqlCommand("SELECT computer_id FROM computers WHERE name = @SelectedPC", connection);
                         computerIdCommand.Parameters.AddWithValue("@SelectedPC", secili_pc);
                         object computerIdResult = computerIdCommand.ExecuteScalar();
-                        int computerId = 0;
-                        if (computerIdResult != null)
-                        {
-                            computerId = Convert.ToInt32(computerIdResult);
-                        }
+                        int computerId = computerIdResult != DBNull.Value ? Convert.ToInt32(computerIdResult) : 0;
 
                         // Oturum bilgilerini ekleme
                         SqlCommand addSessions = new SqlCommand(
-                            "INSERT INTO sessions (user_id, computer_id,total_price, start_time, end_time) " +
-                            "VALUES (@UserId, @ComputerId,@TotalPrice, @StartTime, @EndTime)",
+                            "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
+                            "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)",
                             connection);
                         addSessions.Parameters.AddWithValue("@UserId", userId);
                         addSessions.Parameters.AddWithValue("@ComputerId", computerId);
@@ -134,31 +125,24 @@ namespace InternetCafeManagement
                         addSessions.Parameters.AddWithValue("@EndTime", endTimeString);
                         addSessions.Parameters.AddWithValue("@TotalPrice", sessionBalance);
 
-
                         addSessions.ExecuteNonQuery();
-
-                        Application.Exit();
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Hata nedeni:" + ex.Message);
+                        MessageBox.Show("Hata nedeni: " + ex.Message);
                     }
                     finally
                     {
                         connection.Close();
+                        Application.Exit();  // Uygulamanın çıkması en son yapılmalı
                     }
-
                 }
-
-
-
-
-
             }
-            
+
+
 
         }
-       
+
         private void UsersSession_Load(object sender, EventArgs e)
         {
             
@@ -166,7 +150,7 @@ namespace InternetCafeManagement
             label2.Text +=" "+ secili_pc;
             label5.Text  = "Dakika: 0 Saniye:0";
             lblSessionCount.Text +=sessionBalance;
-            oturum_suresi = oturum_suresi * 60;
+            
 
             timer1.Start();
             start_time = DateTime.Now;
@@ -181,39 +165,54 @@ namespace InternetCafeManagement
         {
             saniye++;  // Her tikte saniyeyi arttırıyoruz.
             lasttime = oturum_suresi - saniye;
-            AddTime add = new AddTime();
-            add.oturum_suresi = lasttime;
+            label4.Text = "Kalan Süre:" + lasttime.ToString();
             saniye2++;
+
+            
+                  
             // Oturum süresi (dakika olarak) dışarıdan alındığı için saniyeye çevrilmiş olmalı.
             if (saniye <= oturum_suresi) // Oturum süresi saniye cinsinden kontrol ediliyor.
             {
-                label5.Text = "Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
-                // Eğer saniye 60'a ulaştıysa, dakikayı arttırıyoruz.
-                if (saniye % 60 == 0)
+                user_balance -= sessionBalance;
+                using (SqlConnection connection=new SqlConnection(connectionString))
                 {
-                    
-                    dakika++;  // Dakikayı arttır
-                               // Ekranda dakika ve saniye bilgilerini güncelle
+                    connection.Open();
+                    SqlCommand balanceguncelle = new SqlCommand("Update users SET balance=@UserBalance where email=@UserMail ", connection);
+                    balanceguncelle.Parameters.AddWithValue("@UserBalance", user_balance);
+                    balanceguncelle.Parameters.AddWithValue("@UserMail", user_mail);
+                    balanceguncelle.ExecuteNonQuery();
+                    connection.Close();
                     label5.Text = "Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
-                    saniye2 = 0;
-                    // Oturum süresi her dakika başında ekleniyor (örneğin 0.25) ve label'a yazdırılıyor.
-                    sessionBalance += (dakika*0.25f);
-                    lblSessionCount.Text += "Oturum Süresi: " + sessionBalance.ToString();
-                }
-
-                // Eğer dakika 60'a ulaştıysa, saati arttırıyoruz.
-                if (dakika == 60)
-                {
-                    saat++;  // Saati arttır
-                    if (dakikasifirla == true)
+                    // Eğer saniye 60'a ulaştıysa, dakikayı arttırıyoruz.
+                    
+                    if (saniye % 60 == 0)
                     {
 
-
-                        dakika = 0;  // Dakikayı sıfırla
+                        dakika++;  // Dakikayı arttır
+                                   // Ekranda dakika ve saniye bilgilerini güncelle
+                        
+                        label5.Text = "Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
+                        saniye2 = 0;
+                        // Oturum süresi her dakika başında ekleniyor (örneğin 0.25) ve label'a yazdırılıyor.
+                        sessionBalance += (dakika * 0.25f);
+                        lblSessionCount.Text = "Oturum Süresi: " + sessionBalance.ToString();
                     }
-                    saniye2 = 0;             // Ekranda saat, dakika ve saniye bilgilerini güncelle
-                    label5.Text = "Saat: " + saat.ToString() + " Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
+                    
+                    // Eğer dakika 60'a ulaştıysa, saati arttırıyoruz.
+                    if (dakika == 60)
+                    {
+                        saat++;  // Saati arttır
+                        if (dakikasifirla == true)
+                        {
+
+
+                            dakika = 0;  // Dakikayı sıfırla
+                        }
+                        saniye2 = 0;             // Ekranda saat, dakika ve saniye bilgilerini güncelle
+                        label5.Text = "Saat: " + saat.ToString() + " Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
+                    }
                 }
+                    
             }
 
 
@@ -239,7 +238,7 @@ namespace InternetCafeManagement
                         SqlCommand balanceupdate = new SqlCommand("update users SET balance=balance-@SessionBalance where email=@SessionMail", connection);
                         balanceupdate.Parameters.AddWithValue("@SessionBalance", sessionBalance);
                         balanceupdate.Parameters.AddWithValue("@SessionMail", user_mail);
-                        user_balance -= sessionBalance;
+                        
                         // user_id alma
                         SqlCommand userIdCommand = new SqlCommand(
                             "SELECT user_id FROM users WHERE email = @UserMail",
@@ -277,6 +276,8 @@ namespace InternetCafeManagement
 
 
                         addSessions.ExecuteNonQuery();
+
+
 
 
 
@@ -355,6 +356,8 @@ namespace InternetCafeManagement
 
         private void pictureBox5_Click(object sender, EventArgs e)
         {
+            timer1.Stop();
+            MessageBox.Show((lasttime/60).ToString());
             AddTime add = new AddTime()
             {
                 user_balance = user_balance,
@@ -363,9 +366,81 @@ namespace InternetCafeManagement
                 oturum_suresi = lasttime,
                 session_balance = this.sessionBalance,
             };
-            timer1.Stop();
+           
             add.Show();
             this.Hide();
         }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Oturumu kapatmak istediğinizden emin misiniz?", "Oturumu Kapat", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                timer1.Stop();
+
+                try
+                {
+                    string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
+                    string endTimeString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    {
+                        connection.Open();
+
+                        // Bilgisayar durumunu güncelle
+                        SqlCommand updateComputerStatus = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @SelectedPC", connection);
+                        updateComputerStatus.Parameters.AddWithValue("@SelectedPC", secili_pc);
+                        updateComputerStatus.ExecuteNonQuery();
+
+                        // Kullanıcı ID'sini al
+                        SqlCommand userIdCommand = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
+                        userIdCommand.Parameters.AddWithValue("@UserMail", user_mail);
+                        object userIdResult = userIdCommand.ExecuteScalar();
+                        int userId = userIdResult != DBNull.Value ? Convert.ToInt32(userIdResult) : 0;
+
+                        // Bilgisayar ID'sini al
+                        SqlCommand computerIdCommand = new SqlCommand("SELECT computer_id FROM computers WHERE name = @SelectedPC", connection);
+                        computerIdCommand.Parameters.AddWithValue("@SelectedPC", secili_pc);
+                        object computerIdResult = computerIdCommand.ExecuteScalar();
+                        int computerId = computerIdResult != DBNull.Value ? Convert.ToInt32(computerIdResult) : 0;
+
+                        // Oturum bilgilerini kaydet
+                        SqlCommand saveSession = new SqlCommand(
+                            "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
+                            "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)", connection);
+                        saveSession.Parameters.AddWithValue("@UserId", userId);
+                        saveSession.Parameters.AddWithValue("@ComputerId", computerId);
+                        saveSession.Parameters.AddWithValue("@TotalPrice", sessionBalance);
+                        saveSession.Parameters.AddWithValue("@StartTime", startTimeString);
+                        saveSession.Parameters.AddWithValue("@EndTime", endTimeString);
+                        saveSession.ExecuteNonQuery();
+
+                        // Kullanıcı bakiyesini güncelle
+                        SqlCommand updateBalance = new SqlCommand("UPDATE users SET balance = @UserBalance WHERE email = @UserMail", connection);
+                        updateBalance.Parameters.AddWithValue("@UserBalance", user_balance);
+                        updateBalance.Parameters.AddWithValue("@UserMail", user_mail);
+                        updateBalance.ExecuteNonQuery();
+
+                        MessageBox.Show("Oturum başarıyla kapatıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+                    // Ana sayfaya dön
+                    AnaSayfa anaSayfa = new AnaSayfa
+                    {
+                        user_role = user_role,
+                        user_balance = user_balance,
+                        user_mail = user_mail,
+                    };
+                    anaSayfa.Show();
+                    this.Hide();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
     }
 }

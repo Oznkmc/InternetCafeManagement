@@ -61,7 +61,7 @@ namespace InternetCafeManagement
                         object result2 = balance.ExecuteScalar();
                         if (result2 != null && result2 != DBNull.Value)
                         {
-                            userbalance = Convert.ToInt32(result2); // Bakiyeyi güncelliyoruz
+                            userbalance =Convert.ToDouble(result2); // Bakiyeyi güncelliyoruz
                         }
                         else
                         {

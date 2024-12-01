@@ -23,10 +23,28 @@ namespace InternetCafeManagement
         public double user_balance { get; set; }
         public string secili_pc { get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
-
+        int userID;
+        //object giftResult;
+        int parsedOturumSuresi;
         private void CustomInputSession_Load(object sender, EventArgs e)
         {
             // Yükleme işlemi varsa buraya eklenebilir
+            //user id alacaz
+
+
+            // Hediye kullanımı kontrolü
+
+
+
+
+
+
+
+
+
+
+
+
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
@@ -98,7 +116,7 @@ namespace InternetCafeManagement
             //    }
             //}
             // Süreli oturum
-             if (int.TryParse(txtInput.Text, out int parsedOturumSuresi) && parsedOturumSuresi > 0)
+            if (int.TryParse(txtInput.Text, out int parsedOturumSuresi) && parsedOturumSuresi > 0)
             {
                 if (parsedOturumSuresi >= 0)
                 {
@@ -113,7 +131,7 @@ namespace InternetCafeManagement
                             // Oturum başlatma
                             UsersSession usersSession = new UsersSession
                             {
-                                oturum_suresi = oturumSuresi,
+                                oturum_suresi = oturumSuresi*60,
                                 user_role = this.user_role,
                                 user_mail = this.user_mail,
                                 user_balance = this.user_balance,
@@ -175,7 +193,7 @@ namespace InternetCafeManagement
         private void pictureBox4_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show("Oturum Menüsüne Dönmeye Emin Misin?");
-            if(result==DialogResult.Yes)
+            if (result == DialogResult.Yes)
             {
                 Sessions sessions = new Sessions();
                 sessions.user_balance = this.user_balance;
@@ -184,7 +202,7 @@ namespace InternetCafeManagement
                 sessions.Show();
                 this.Hide();
             }
-           
+
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)
@@ -194,7 +212,7 @@ namespace InternetCafeManagement
             {
                 Application.Exit();
             }
-               
+
         }
     }
 }

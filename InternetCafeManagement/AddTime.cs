@@ -35,24 +35,26 @@ namespace InternetCafeManagement
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            int dakika=Convert.ToInt32(textBox1.Text);
-            int dakikacevir = dakika * 60;
-            int toplamzaman=oturum_suresi+dakikacevir;
-            MessageBox.Show(dakikacevir.ToString());
+            int dakika=Convert.ToInt32(textBox1.Text)*60;
+            
+            int toplamzaman=oturum_suresi+dakika;
+           
             DialogResult result = MessageBox.Show("Oturum Süresi:"+toplamzaman/60, "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
             if (result == DialogResult.Yes)
             {
                
                 UsersSession usersSession = new UsersSession()
                 {
+
                     user_balance = user_balance,
                     user_mail = user_mail,
                     user_role = user_role,
                     oturum_suresi = toplamzaman,
                     sessionBalance=this.session_balance,
-                    
+                    secili_pc=this.secili_pc
                     
                 };
+               
                 usersSession.Show();
                 this.Hide();
             }

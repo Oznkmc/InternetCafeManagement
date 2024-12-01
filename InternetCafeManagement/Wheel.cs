@@ -143,7 +143,7 @@ namespace InternetCafeManagement
                 }
                 else
                 {
-                    MessageBox.Show("Bakiyenizde en az 200 lira bulunmalıdır.");
+                    MessageBox.Show("Bakiyenizde en az 200 lira bulunmalıdır.\n Sizin Bakiyeniz:"+user_balance);
                 }
             }
             else
