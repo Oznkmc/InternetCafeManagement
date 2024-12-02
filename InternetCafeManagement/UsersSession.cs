@@ -41,105 +41,105 @@ namespace InternetCafeManagement
             order.Show();
 
         }
+        private void OturumuKapat(bool uygulamayiKapat)
+        {
+            timer1.Stop(); // Zamanlayıcıyı durdur
+
+            try
+            {
+                string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
+                string endTimeString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // Bilgisayar durumunu 'available' olarak güncelle
+                    SqlCommand updateComputerStatus = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @SelectedPC", connection);
+                    updateComputerStatus.Parameters.AddWithValue("@SelectedPC", secili_pc);
+                    updateComputerStatus.ExecuteNonQuery();
+
+                    // Kullanıcı ID'sini al
+                    SqlCommand userIdCommand = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
+                    userIdCommand.Parameters.AddWithValue("@UserMail", user_mail);
+                    object userIdResult = userIdCommand.ExecuteScalar();
+                    int userId = userIdResult != DBNull.Value ? Convert.ToInt32(userIdResult) : 0;
+
+                    // Bilgisayar ID'sini al
+                    SqlCommand computerIdCommand = new SqlCommand("SELECT computer_id FROM computers WHERE name = @SelectedPC", connection);
+                    computerIdCommand.Parameters.AddWithValue("@SelectedPC", secili_pc);
+                    object computerIdResult = computerIdCommand.ExecuteScalar();
+                    int computerId = computerIdResult != DBNull.Value ? Convert.ToInt32(computerIdResult) : 0;
+
+                    // Oturum bilgilerini kaydet
+                    SqlCommand saveSession = new SqlCommand(
+                        "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
+                        "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)", connection);
+                    saveSession.Parameters.AddWithValue("@UserId", userId);
+                    saveSession.Parameters.AddWithValue("@ComputerId", computerId);
+                    saveSession.Parameters.AddWithValue("@TotalPrice", sessionBalance);
+                    saveSession.Parameters.AddWithValue("@StartTime", startTimeString);
+                    saveSession.Parameters.AddWithValue("@EndTime", endTimeString);
+                    saveSession.ExecuteNonQuery();
+
+                    // Kullanıcı bakiyesini güncelle
+                    SqlCommand updateBalance = new SqlCommand("UPDATE users SET balance = @UserBalance WHERE email = @UserMail", connection);
+                    updateBalance.Parameters.AddWithValue("@UserBalance", user_balance);
+                    updateBalance.Parameters.AddWithValue("@UserMail", user_mail);
+                    updateBalance.ExecuteNonQuery();
+                }
+
+                // Kullanıcıya bilgi mesajı
+                MessageBox.Show("Oturum başarıyla kapatıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Uygulamayı kapat veya anasayfaya dön
+                if (uygulamayiKapat)
+                {
+                    Application.Exit();
+                }
+                else
+                {
+                    AnaSayfa anaSayfa = new AnaSayfa
+                    {
+                        user_role = user_role,
+                        user_balance = user_balance,
+                        user_mail = user_mail,
+                    };
+                    anaSayfa.Show();
+                    this.Hide();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Eğer anasayfaya dönmek istersen oturumun sıfırlanacaktır.\n Anasayfaya geçmeye emin misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                if(result==DialogResult.Yes)
+            DialogResult result = MessageBox.Show("Anasayfaya dönmek oturumunuzu sonlandıracaktır. Emin misiniz?", "Anasayfaya Dönüş", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
             {
-                
-                    using (SqlConnection connection = new SqlConnection(connectionString))
-                    {
-                    try
-                    {
-                         connection.Open();
-                        SqlCommand command = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @secilipc", connection);
-                        command.Parameters.AddWithValue("@secilipc", secili_pc);
-                        command.ExecuteNonQuery();
-                        timer1.Stop();
-                        AnaSayfa ana = new AnaSayfa();
-                        ana.user_mail = user_mail;
-                        ana.user_balance = user_balance;
-                        ana.user_role = user_role;
-                        ana.Show();
-                        this.Hide();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Hata nedeni:" + ex.Message);
-                    }
-                    finally
-                    {
-                        connection.Close();
-                    }
-
-                }
-                
-               
-            
-                    
-
+                OturumuKapat(false); // Anasayfaya dön seçeneği ile oturumu kapat
             }
 
-           
+
+
+
+
         }
+
+           
+        
 
         private void pictureBox3_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            DialogResult result = MessageBox.Show("Uygulamadan çıkmak istediğinizden emin misiniz?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
             if (result == DialogResult.Yes)
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    try
-                    {
-                        string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
-                        string endTimeString = end_time.ToString("yyyy-MM-dd HH:mm:ss");
-
-                        connection.Open();
-
-                        // Bilgisayar durumu güncelleme
-                        SqlCommand command = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @secilipc", connection);
-                        command.Parameters.AddWithValue("@secilipc", secili_pc);
-                        command.ExecuteNonQuery();
-
-                        timer1.Stop();
-
-                        // Kullanıcı ID alma
-                        SqlCommand userIdCommand = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
-                        userIdCommand.Parameters.AddWithValue("@UserMail", user_mail);
-                        object userIdResult = userIdCommand.ExecuteScalar();
-                        int userId = userIdResult != DBNull.Value ? Convert.ToInt32(userIdResult) : 0;
-
-                        // Bilgisayar ID alma
-                        SqlCommand computerIdCommand = new SqlCommand("SELECT computer_id FROM computers WHERE name = @SelectedPC", connection);
-                        computerIdCommand.Parameters.AddWithValue("@SelectedPC", secili_pc);
-                        object computerIdResult = computerIdCommand.ExecuteScalar();
-                        int computerId = computerIdResult != DBNull.Value ? Convert.ToInt32(computerIdResult) : 0;
-
-                        // Oturum bilgilerini ekleme
-                        SqlCommand addSessions = new SqlCommand(
-                            "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
-                            "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)",
-                            connection);
-                        addSessions.Parameters.AddWithValue("@UserId", userId);
-                        addSessions.Parameters.AddWithValue("@ComputerId", computerId);
-                        addSessions.Parameters.AddWithValue("@StartTime", startTimeString);
-                        addSessions.Parameters.AddWithValue("@EndTime", endTimeString);
-                        addSessions.Parameters.AddWithValue("@TotalPrice", sessionBalance);
-
-                        addSessions.ExecuteNonQuery();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Hata nedeni: " + ex.Message);
-                    }
-                    finally
-                    {
-                        connection.Close();
-                        Application.Exit();  // Uygulamanın çıkması en son yapılmalı
-                    }
-                }
+                OturumuKapat(true); // Uygulamayı kapat seçeneği ile oturumu kapat
             }
 
 

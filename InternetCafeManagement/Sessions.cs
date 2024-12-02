@@ -147,7 +147,7 @@ namespace InternetCafeManagement
                                             user_role = this.user_role,
                                             user_mail = this.user_mail,
                                             user_balance = this.user_balance,
-                                            secili_pc = this.secili_pc,
+                                            secili_pc ="PC1",
                                             hediyekullandi = true,
                                         };
                                         this.Hide();
@@ -232,7 +232,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc ="PC3"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -323,7 +323,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc ="PC4"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -413,7 +413,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc ="PC5"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -502,7 +502,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc = "PC6"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -521,7 +521,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc = "PC6"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -592,7 +592,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc = "PC7"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -682,7 +682,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc ="PC8"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -772,7 +772,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc ="PC9"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -861,7 +861,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc ="PC10"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -951,7 +951,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc = "PC11"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -1041,7 +1041,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc ="PC12"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();
@@ -1131,7 +1131,7 @@ namespace InternetCafeManagement
                                         user_role = this.user_role,
                                         user_mail = this.user_mail,
                                         user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
+                                        secili_pc = "PC2"
                                     };
                                     this.Hide();
                                     usersSessionGift.Show();

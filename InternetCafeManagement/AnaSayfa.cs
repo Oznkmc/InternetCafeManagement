@@ -39,6 +39,7 @@ namespace InternetCafeManagement
             sessions.user_balance = user_balance;
             sessions.user_role = user_role;
             sessions.user_mail = user_mail;
+            
             sessions.Show();
             this.Hide();
         }
