@@ -68,7 +68,7 @@ namespace InternetCafeManagement
                                     cmd2.Parameters.AddWithValue("@UserId", userid);
                                     cmd2.Parameters.AddWithValue("@Reward", textBox1.Text); // Kazanılan hediyeyi ekliyoruz
                                     cmd2.ExecuteNonQuery(); // Veriyi kaydediyoruz.
-                                }
+                                } 
                                 else if(textBox1.Text=="3 saat ücretsiz oturum")
                                 {
                                     // Hediyeyi gift_wheel tablosuna ekliyoruz

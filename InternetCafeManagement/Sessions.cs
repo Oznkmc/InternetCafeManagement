@@ -90,131 +90,110 @@ namespace InternetCafeManagement
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    SqlCommand idgetir = new SqlCommand("select user_id from  users where email=@UserMail", connection);
-                    idgetir.Parameters.AddWithValue("UserMail", user_mail);
+
+                    SqlCommand idgetir = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
+                    idgetir.Parameters.AddWithValue("@UserMail", user_mail);
                     object IDresult = idgetir.ExecuteScalar();
+
                     if (IDresult != null)
                     {
                         int idtake = (int)IDresult;
 
-                        // Hediye sorgusu
                         SqlCommand giftCommand = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
-                        giftCommand.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
+                        giftCommand.Parameters.AddWithValue("@UserID", idtake);
                         object result = giftCommand.ExecuteScalar();
 
                         if (result != null)
                         {
-                            string gift = (string)result;
-                            DialogResult result2 = MessageBox.Show("Bir Hediyeniz Var. Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                            if (result2 == DialogResult.Yes)
+                            string gift = result.ToString(); // Hediye türü
+
+                            SqlCommand is_claimed = new SqlCommand("SELECT is_claimed FROM gift_wheel WHERE user_id = @UserID", connection);
+                            is_claimed.Parameters.AddWithValue("@UserID", idtake);
+                            object claimResult = is_claimed.ExecuteScalar();
+
+                            if (claimResult != null && claimResult is bool claim)
                             {
-                                SqlCommand id = new SqlCommand("select user_id from users where email=@UserMail", connection);
-                                id.Parameters.AddWithValue("@UserMail", user_mail);
-                                object IDresult1 = id.ExecuteScalar();
-                                if (IDresult != null)
+                                if (!claim) // Hediye henüz kullanılmadıysa
                                 {
-                                    int id2 = (int)IDresult1;
-                                    SqlCommand lasttimegonder = new SqlCommand("select lasttime froom gift_wheel where user_id=@UserID", connection);
-                                    lasttimegonder.Parameters.AddWithValue("@UserID", id2);
-                                    object LastTımeresult = lasttimegonder.ExecuteScalar();
-                                    if (lasttimegonder != null)
+                                    DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({gift}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                                    if (result2 == DialogResult.Yes)
                                     {
-                                        int lasttime = (int)LastTımeresult;
+                                        int lasttime = 0;
+
+                                        // Hediye türüne göre süreyi belirle
+                                        if (gift == "1 saat ücretsiz oturum")
+                                        {
+                                            lasttime = 60; // 1 saat
+                                        }
+                                        else if (gift == "3 saat ücretsiz oturum")
+                                        {
+                                            lasttime = 180; // 3 saat
+                                        }
+                                        else
+                                        {
+                                            MessageBox.Show("Geçersiz hediye türü.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            return;
+                                        }
+
+                                        SqlCommand Update_is_claimed = new SqlCommand("UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserID", connection);
+                                        Update_is_claimed.Parameters.AddWithValue("@UserID", idtake);
+                                        Update_is_claimed.ExecuteNonQuery();
+
                                         parsedOturumSuresi = lasttime;
-                                       
+
                                         UsersSession usersSessionGift = new UsersSession
                                         {
-
                                             oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
                                             user_role = this.user_role,
                                             user_mail = this.user_mail,
                                             user_balance = this.user_balance,
                                             secili_pc = this.secili_pc,
                                             hediyekullandi = true,
-                                           
-
                                         };
                                         this.Hide();
                                         usersSessionGift.Show();
 
                                         return;
-
                                     }
                                 }
-                               
-                            //    if (gift == "1 saat ücretsiz oturum")
-                            //    {
-                                   
-                            //        //parsedOturumSuresi = 60; // 1 saat
-                            //        //MessageBox.Show("Hediyeniz olan 1 saatlik oturum kullanılıyor!");
-
-
-
-                            //        // Oturum başlatma
-                            //        //UsersSession usersSessionGift = new UsersSession
-                            //        //{
-                            //        //    oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
-                            //        //    user_role = this.user_role,
-                            //        //    user_mail = this.user_mail,
-                            //        //    user_balance = this.user_balance,
-                            //        //    secili_pc = this.secili_pc,
-                            //        //    hediyekullandi = true,
-                            //        //    hediyeadi = gift
-
-                            //        //};
-                            //        //this.Hide();
-                            //        //usersSessionGift.Show();
-
-                            //        //return; // Hediye kullanıldığı için işlemi bitir
-                            //    }
-                            //    //if (gift == "3 saat ücretsiz oturum")
-                            //    //{
-                            //    //    parsedOturumSuresi = 180; // 1 saat
-                            //    //    MessageBox.Show("Hediyeniz olan 3 saatlik oturum kullanılıyor!");
-
-                            //    //    // Oturum başlatma
-                            //    //    UsersSession usersSessionGift = new UsersSession
-                            //    //    {
-                            //    //        oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
-                            //    //        user_role = this.user_role,
-                            //    //        user_mail = this.user_mail,
-                            //    //        user_balance = this.user_balance,
-                            //    //        secili_pc = this.secili_pc
-                            //    //    };
-                            //    //    this.Hide();
-                            //    //    usersSessionGift.Show();
-
-                            //    //    return; // Hediye kullanıldığı için işlemi bitir
-                            //    //}
-                            //}
-                           
+                                else
+                                {
+                                    MessageBox.Show("Hediye zaten kullanılmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show("is_claimed değeri alınamadı veya geçersiz.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
                         }
                         else
                         {
-                            MessageBox.Show("Hediyeniz bulunmamaktadır.");
+                            MessageBox.Show("Hediye bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
-
-
+                    else
+                    {
+                        MessageBox.Show("Kullanıcı ID'si bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
+
+                // Eğer hediye varsa custominput açılmayacak
+                // Eğer reddederse custominput açılacak
+                CustomInputSession customInputSession = new CustomInputSession();
+                customInputSession.user_role = user_role;
+                customInputSession.user_mail = user_mail;
+                customInputSession.user_balance = user_balance;
+                customInputSession.secili_pc = lblPC1.Text;
+
+                customInputSession.Show();
+                this.Hide();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Hata nedeni:" + ex.Message);
             }
-        
-        // eğer hediye varsa custominput açılmayacak
-        //eğer reddederse custominoput açılacak
-        CustomInputSession customInputSession = new CustomInputSession();
-            customInputSession.user_role = user_role;
-            customInputSession.user_mail = user_mail;
-            customInputSession.user_balance = user_balance;
-            customInputSession.secili_pc = lblPC1.Text;
-
-            customInputSession.Show();
-
-            this.Hide();
         }
+
 
         private void picturePC3_Click(object sender, EventArgs e)
         {
