@@ -61,12 +61,29 @@ namespace InternetCafeManagement
                             if (result != null)
                             {
                                 userid = (int)result;
-
-                                // Hediyeyi gift_wheel tablosuna ekliyoruz
-                                SqlCommand cmd2 = new SqlCommand("insert into gift_wheel(user_id, reward) values(@UserId, @Reward)", connection);
-                                cmd2.Parameters.AddWithValue("@UserId", userid);
-                                cmd2.Parameters.AddWithValue("@Reward", textBox1.Text); // Kazanılan hediyeyi ekliyoruz
-                                cmd2.ExecuteNonQuery(); // Veriyi kaydediyoruz.
+                                if(textBox1.Text=="1 saat ücretsiz oturum")
+                                {
+                                    // Hediyeyi gift_wheel tablosuna ekliyoruz
+                                    SqlCommand cmd2 = new SqlCommand("insert into gift_wheel(user_id, reward,isclaimed,lasttime) values(@UserId, @Reward,0,60)", connection);
+                                    cmd2.Parameters.AddWithValue("@UserId", userid);
+                                    cmd2.Parameters.AddWithValue("@Reward", textBox1.Text); // Kazanılan hediyeyi ekliyoruz
+                                    cmd2.ExecuteNonQuery(); // Veriyi kaydediyoruz.
+                                }
+                                else if(textBox1.Text=="3 saat ücretsiz oturum")
+                                {
+                                    // Hediyeyi gift_wheel tablosuna ekliyoruz
+                                    SqlCommand cmd2 = new SqlCommand("insert into gift_wheel(user_id, reward,isclaimed,lasttime) values(@UserId, @Reward,0,180)", connection);
+                                    cmd2.Parameters.AddWithValue("@UserId", userid);
+                                    cmd2.Parameters.AddWithValue("@Reward", textBox1.Text); // Kazanılan hediyeyi ekliyoruz
+                                    cmd2.ExecuteNonQuery(); // Veriyi kaydediyoruz.
+                                }
+                               else
+                                {
+                                    SqlCommand cmd2 = new SqlCommand("insert into gift_wheel(user_id, reward) values(@UserId, @Reward)", connection);
+                                    cmd2.Parameters.AddWithValue("@UserId", userid);
+                                    cmd2.Parameters.AddWithValue("@Reward", textBox1.Text); // Kazanılan hediyeyi ekliyoruz
+                                    cmd2.ExecuteNonQuery(); // Veriyi kaydediyoruz.
+                                }
                             }
                             else
                             {
@@ -80,7 +97,7 @@ namespace InternetCafeManagement
                             balance_update.Parameters.AddWithValue("@UserBalance", user_balance);
                             balance_update.Parameters.AddWithValue("Userid", userid);
                             balance_update.ExecuteNonQuery();
-
+                            
 
                         }
                         catch (Exception exception)

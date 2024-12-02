@@ -25,6 +25,9 @@ namespace InternetCafeManagement
         public int oturum_suresi {  get; set; }
         private DateTime start_time { get; set; }
         private DateTime end_time { get; set; }
+        public bool hediyekullandi {  get; set; }
+        public string hediyeadi {  get; set; }
+
         public double sessionBalance;
         public int dakika;
         public int saniye = 0;
@@ -176,12 +179,16 @@ namespace InternetCafeManagement
                 user_balance -= sessionBalance;
                 using (SqlConnection connection=new SqlConnection(connectionString))
                 {
-                    connection.Open();
-                    SqlCommand balanceguncelle = new SqlCommand("Update users SET balance=@UserBalance where email=@UserMail ", connection);
-                    balanceguncelle.Parameters.AddWithValue("@UserBalance", user_balance);
-                    balanceguncelle.Parameters.AddWithValue("@UserMail", user_mail);
-                    balanceguncelle.ExecuteNonQuery();
-                    connection.Close();
+                    if(hediyekullandi==false)
+                    {
+                        connection.Open();
+                        SqlCommand balanceguncelle = new SqlCommand("Update users SET balance=@UserBalance where email=@UserMail ", connection);
+                        balanceguncelle.Parameters.AddWithValue("@UserBalance", user_balance);
+                        balanceguncelle.Parameters.AddWithValue("@UserMail", user_mail);
+                        balanceguncelle.ExecuteNonQuery();
+                        connection.Close();
+                    }
+                  
                     label5.Text = "Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
                     // Eğer saniye 60'a ulaştıysa, dakikayı arttırıyoruz.
                     
@@ -230,15 +237,18 @@ namespace InternetCafeManagement
                     using (SqlConnection connection = new SqlConnection(connectionString))
                     {
                         connection.Open();
-
+                        if(hediyekullandi==false)
+                        {
+                            SqlCommand balanceupdate = new SqlCommand("update users SET balance=balance-@SessionBalance where email=@SessionMail", connection);
+                            balanceupdate.Parameters.AddWithValue("@SessionBalance", sessionBalance);
+                            balanceupdate.Parameters.AddWithValue("@SessionMail", user_mail);
+                            balanceupdate.ExecuteNonQuery();
+                        }
                         // SQL sorgusunda parametreyi düzgün kullanma
                         SqlCommand command = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @secilipc", connection);
                         command.Parameters.AddWithValue("@secilipc", secili_pc);
                         int rowsAffected = command.ExecuteNonQuery(); // Etkilenen satır sayısını kontrol edebilirsiniz
-                        SqlCommand balanceupdate = new SqlCommand("update users SET balance=balance-@SessionBalance where email=@SessionMail", connection);
-                        balanceupdate.Parameters.AddWithValue("@SessionBalance", sessionBalance);
-                        balanceupdate.Parameters.AddWithValue("@SessionMail", user_mail);
-                        
+                      
                         // user_id alma
                         SqlCommand userIdCommand = new SqlCommand(
                             "SELECT user_id FROM users WHERE email = @UserMail",
@@ -283,7 +293,7 @@ namespace InternetCafeManagement
 
                         MessageBox.Show("Oturum Süresi:" + dakika.ToString() + "\n Seçili Bilgisayar:" + secili_pc + "\n Toplam Tutar:" + sessionBalance.ToString());
 
-                        balanceupdate.ExecuteNonQuery();
+                      
                         if (rowsAffected < 0)
                         {
                             MessageBox.Show("Bilgisayar bulunamadı veya durum zaten güncel.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);

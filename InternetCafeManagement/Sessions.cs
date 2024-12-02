@@ -104,51 +104,89 @@ namespace InternetCafeManagement
 
                         if (result != null)
                         {
+                            string gift = (string)result;
                             DialogResult result2 = MessageBox.Show("Bir Hediyeniz Var. Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                             if (result2 == DialogResult.Yes)
                             {
-                                string gift = (string)result;
-                                if (gift == "1 saat ücretsiz oturum")
+                                SqlCommand id = new SqlCommand("select user_id from users where email=@UserMail", connection);
+                                id.Parameters.AddWithValue("@UserMail", user_mail);
+                                object IDresult1 = id.ExecuteScalar();
+                                if (IDresult != null)
                                 {
-                                    parsedOturumSuresi = 60; // 1 saat
-                                    MessageBox.Show("Hediyeniz olan 1 saatlik oturum kullanılıyor!");
-
-
-
-                                    // Oturum başlatma
-                                    UsersSession usersSessionGift = new UsersSession
+                                    int id2 = (int)IDresult1;
+                                    SqlCommand lasttimegonder = new SqlCommand("select lasttime froom gift_wheel where user_id=@UserID", connection);
+                                    lasttimegonder.Parameters.AddWithValue("@UserID", id2);
+                                    object LastTımeresult = lasttimegonder.ExecuteScalar();
+                                    if (lasttimegonder != null)
                                     {
-                                        oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
-                                        user_role = this.user_role,
-                                        user_mail = this.user_mail,
-                                        user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
-                                    };
-                                    this.Hide();
-                                    usersSessionGift.Show();
+                                        int lasttime = (int)LastTımeresult;
+                                        parsedOturumSuresi = lasttime;
+                                       
+                                        UsersSession usersSessionGift = new UsersSession
+                                        {
 
-                                    return; // Hediye kullanıldığı için işlemi bitir
+                                            oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
+                                            user_role = this.user_role,
+                                            user_mail = this.user_mail,
+                                            user_balance = this.user_balance,
+                                            secili_pc = this.secili_pc,
+                                            hediyekullandi = true,
+                                           
+
+                                        };
+                                        this.Hide();
+                                        usersSessionGift.Show();
+
+                                        return;
+
+                                    }
                                 }
-                                if (gift == "3 saat ücretsiz oturum")
-                                {
-                                    parsedOturumSuresi = 180; // 1 saat
-                                    MessageBox.Show("Hediyeniz olan 3 saatlik oturum kullanılıyor!");
+                               
+                            //    if (gift == "1 saat ücretsiz oturum")
+                            //    {
+                                   
+                            //        //parsedOturumSuresi = 60; // 1 saat
+                            //        //MessageBox.Show("Hediyeniz olan 1 saatlik oturum kullanılıyor!");
 
-                                    // Oturum başlatma
-                                    UsersSession usersSessionGift = new UsersSession
-                                    {
-                                        oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
-                                        user_role = this.user_role,
-                                        user_mail = this.user_mail,
-                                        user_balance = this.user_balance,
-                                        secili_pc = this.secili_pc
-                                    };
-                                    this.Hide();
-                                    usersSessionGift.Show();
 
-                                    return; // Hediye kullanıldığı için işlemi bitir
-                                }
-                            }
+
+                            //        // Oturum başlatma
+                            //        //UsersSession usersSessionGift = new UsersSession
+                            //        //{
+                            //        //    oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
+                            //        //    user_role = this.user_role,
+                            //        //    user_mail = this.user_mail,
+                            //        //    user_balance = this.user_balance,
+                            //        //    secili_pc = this.secili_pc,
+                            //        //    hediyekullandi = true,
+                            //        //    hediyeadi = gift
+
+                            //        //};
+                            //        //this.Hide();
+                            //        //usersSessionGift.Show();
+
+                            //        //return; // Hediye kullanıldığı için işlemi bitir
+                            //    }
+                            //    //if (gift == "3 saat ücretsiz oturum")
+                            //    //{
+                            //    //    parsedOturumSuresi = 180; // 1 saat
+                            //    //    MessageBox.Show("Hediyeniz olan 3 saatlik oturum kullanılıyor!");
+
+                            //    //    // Oturum başlatma
+                            //    //    UsersSession usersSessionGift = new UsersSession
+                            //    //    {
+                            //    //        oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
+                            //    //        user_role = this.user_role,
+                            //    //        user_mail = this.user_mail,
+                            //    //        user_balance = this.user_balance,
+                            //    //        secili_pc = this.secili_pc
+                            //    //    };
+                            //    //    this.Hide();
+                            //    //    usersSessionGift.Show();
+
+                            //    //    return; // Hediye kullanıldığı için işlemi bitir
+                            //    //}
+                            //}
                            
                         }
                         else
