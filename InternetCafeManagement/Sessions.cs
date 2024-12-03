@@ -91,6 +91,7 @@ namespace InternetCafeManagement
                 {
                     connection.Open();
 
+                    // Kullanıcı ID'sini almak için sorgu
                     SqlCommand idgetir = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
                     idgetir.Parameters.AddWithValue("@UserMail", user_mail);
                     object IDresult = idgetir.ExecuteScalar();
@@ -99,71 +100,64 @@ namespace InternetCafeManagement
                     {
                         int idtake = (int)IDresult;
 
-                        SqlCommand giftCommand = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
+                        // Hediye bilgilerini almak için sorgu
+                        SqlCommand giftCommand = new SqlCommand("SELECT reward, gift_duration, used_time, is_claimed FROM gift_wheel WHERE user_id = @UserID", connection);
                         giftCommand.Parameters.AddWithValue("@UserID", idtake);
+
+                        // ExecuteScalar ile ödül bilgilerini alıyoruz
                         object result = giftCommand.ExecuteScalar();
 
                         if (result != null)
                         {
-                            string gift = result.ToString(); // Hediye türü
-
-                            SqlCommand is_claimed = new SqlCommand("SELECT is_claimed FROM gift_wheel WHERE user_id = @UserID", connection);
-                            is_claimed.Parameters.AddWithValue("@UserID", idtake);
-                            object claimResult = is_claimed.ExecuteScalar();
-
-                            if (claimResult != null && claimResult is bool claim)
+                            // Hediye var, kullanıcıya bilgi ver
+                            string reward = result.ToString();
+                            DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                            if (result2 == DialogResult.Yes)
                             {
-                                if (!claim) // Hediye henüz kullanılmadıysa
+                                // Hediye kabul edildiğinde işlem
+                                SqlCommand getGiftDetails = new SqlCommand("SELECT gift_duration, used_time FROM gift_wheel WHERE user_id = @UserID", connection);
+                                getGiftDetails.Parameters.AddWithValue("@UserID", idtake);
+                                SqlDataReader reader = getGiftDetails.ExecuteReader();
+                                if (reader.Read())
                                 {
-                                    DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({gift}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                                    if (result2 == DialogResult.Yes)
+                                    int giftDuration = reader["gift_duration"] != DBNull.Value ? Convert.ToInt32(reader["gift_duration"]) : 0;
+                                    int usedTime = reader["used_time"] != DBNull.Value ? Convert.ToInt32(reader["used_time"]) : 0;
+                                    reader.Close();
+
+                                    int remainingTime = giftDuration - usedTime; // Kalan süreyi hesapla
+                                    if (remainingTime <= 0)
                                     {
-                                        int lasttime = 0;
-
-                                        // Hediye türüne göre süreyi belirle
-                                        if (gift == "1 saat ücretsiz oturum")
-                                        {
-                                            lasttime = 60; // 1 saat
-                                        }
-                                        else if (gift == "3 saat ücretsiz oturum")
-                                        {
-                                            lasttime = 180; // 3 saat
-                                        }
-                                        else
-                                        {
-                                            MessageBox.Show("Geçersiz hediye türü.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                            return;
-                                        }
-
-                                        SqlCommand Update_is_claimed = new SqlCommand("UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserID", connection);
-                                        Update_is_claimed.Parameters.AddWithValue("@UserID", idtake);
-                                        Update_is_claimed.ExecuteNonQuery();
-
-                                        parsedOturumSuresi = lasttime;
-
-                                        UsersSession usersSessionGift = new UsersSession
-                                        {
-                                            oturum_suresi = parsedOturumSuresi * 60, // Saniye cinsinden
-                                            user_role = this.user_role,
-                                            user_mail = this.user_mail,
-                                            user_balance = this.user_balance,
-                                            secili_pc ="PC1",
-                                            hediyekullandi = true,
-                                        };
-                                        this.Hide();
-                                        usersSessionGift.Show();
-
-                                        return;
+                                        MessageBox.Show("Hediye süresi tamamlanmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        return; // Eğer süre bitmişse, işlemi sonlandır
                                     }
+
+                                    parsedOturumSuresi = remainingTime * 60; // Kalan süreyi saniyeye çevir
+
+                                    // Kullanıcı oturumu başlat
+                                    UsersSession usersSessionGift = new UsersSession
+                                    {
+                                        oturum_suresi = parsedOturumSuresi,
+                                        user_role = this.user_role,
+                                        user_mail = this.user_mail,
+                                        user_balance = this.user_balance,
+                                        secili_pc = "PC1", // Seçilen bilgisayar
+                                        hediyekullandi = true,
+                                    };
+
+                                    // Hediye kullanıldıktan sonra 'used_time' güncelleniyor
+                                    SqlCommand updateUsedTime = new SqlCommand("UPDATE gift_wheel SET used_time = used_time + @UsedTime WHERE user_id = @UserID", connection);
+                                    updateUsedTime.Parameters.AddWithValue("@UsedTime", remainingTime); // Kalan süre kadar kullanılan süreyi ekle
+                                    updateUsedTime.Parameters.AddWithValue("@UserID", idtake);
+                                    updateUsedTime.ExecuteNonQuery(); // Güncellemeyi yap
+
+                                    this.Hide();
+                                    usersSessionGift.Show();
+                                    return; // İşlem tamamlandı, fonksiyonu sonlandır
                                 }
                                 else
                                 {
-                                    MessageBox.Show("Hediye zaten kullanılmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    MessageBox.Show("Hediye bilgileri alınırken bir hata oluştu.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 }
-                            }
-                            else
-                            {
-                                MessageBox.Show("is_claimed değeri alınamadı veya geçersiz.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
                         else
@@ -176,10 +170,23 @@ namespace InternetCafeManagement
                         MessageBox.Show("Kullanıcı ID'si bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
-                // Eğer hediye varsa custominput açılmayacak
-                // Eğer reddederse custominput açılacak
-                CustomInputSession customInputSession = new CustomInputSession();
+
+
+
+
+
+
+
+
+            // Eğer hediye varsa custominput açılmayacak
+            // Eğer reddederse custominput açılacak
+            CustomInputSession customInputSession = new CustomInputSession();
                 customInputSession.user_role = user_role;
                 customInputSession.user_mail = user_mail;
                 customInputSession.user_balance = user_balance;
@@ -187,11 +194,8 @@ namespace InternetCafeManagement
 
                 customInputSession.Show();
                 this.Hide();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Hata nedeni:" + ex.Message);
-            }
+            
+            
         }
 
 
@@ -210,9 +214,9 @@ namespace InternetCafeManagement
                         int idtake = (int)IDresult;
 
                         // Hediye sorgusu
-                        SqlCommand giftCommand = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
-                        giftCommand.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
-                        object result = giftCommand.ExecuteScalar();
+                        SqlCommand giftCommand1 = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
+                        giftCommand1.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
+                        object result = giftCommand1.ExecuteScalar();
 
                         if (result != null)
                         {
@@ -301,9 +305,9 @@ namespace InternetCafeManagement
                         int idtake = (int)IDresult;
 
                         // Hediye sorgusu
-                        SqlCommand giftCommand = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
-                        giftCommand.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
-                        object result = giftCommand.ExecuteScalar();
+                        SqlCommand giftCommand2 = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
+                        giftCommand2.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
+                        object result = giftCommand2.ExecuteScalar();
 
                         if (result != null)
                         {
@@ -391,9 +395,9 @@ namespace InternetCafeManagement
                         int idtake = (int)IDresult;
 
                         // Hediye sorgusu
-                        SqlCommand giftCommand = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
-                        giftCommand.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
-                        object result = giftCommand.ExecuteScalar();
+                        SqlCommand giftCommand3 = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
+                        giftCommand3.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
+                        object result = giftCommand3.ExecuteScalar();
 
                         if (result != null)
                         {
@@ -480,9 +484,9 @@ namespace InternetCafeManagement
                         int idtake = (int)IDresult;
 
                         // Hediye sorgusu
-                        SqlCommand giftCommand = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
-                        giftCommand.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
-                        object result = giftCommand.ExecuteScalar();
+                        SqlCommand giftCommand4 = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
+                        giftCommand4.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
+                        object result = giftCommand4.ExecuteScalar();
 
                         if (result != null)
                         {
@@ -570,9 +574,9 @@ namespace InternetCafeManagement
                         int idtake = (int)IDresult;
 
                         // Hediye sorgusu
-                        SqlCommand giftCommand = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
-                        giftCommand.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
-                        object result = giftCommand.ExecuteScalar();
+                        SqlCommand giftCommand5 = new SqlCommand("SELECT reward FROM gift_wheel WHERE user_id = @UserID", connection);
+                        giftCommand5.Parameters.AddWithValue("@UserID", idtake); // Kullanıcı ID'si
+                        object result = giftCommand5.ExecuteScalar();
 
                         if (result != null)
                         {

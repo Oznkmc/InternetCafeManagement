@@ -230,8 +230,23 @@ namespace InternetCafeManagement
                             sqlkomut.Parameters.AddWithValue("@userPassword", txtPassword.Text);
                             sqlkomut.Parameters.AddWithValue("@userMail", txtMail.Text);
                             sqlkomut.Parameters.AddWithValue("@userPhonenumber", txtphone.Text);
+                           
+
+
 
                             sqlkomut.ExecuteNonQuery();
+                            SqlCommand idgetir = new SqlCommand("select user_id from users where email=@UserMail",connection);
+                            idgetir.Parameters.AddWithValue("@UserMail", txtMail.Text);
+                            object resultID= idgetir.ExecuteScalar();
+                            if(resultID!=null)
+                            {
+                                int userid=(int) resultID;
+                                SqlCommand gift= new SqlCommand("insert into gift_wheel(user_id) values(@UserId)", connection);
+                                gift.Parameters.AddWithValue("@UserID", userid);
+                                gift.ExecuteNonQuery();
+                            }
+
+                            
                             MessageBox.Show("Kullanıcı başarıyla eklendi!");
 
                             // Formu temizleyelim
