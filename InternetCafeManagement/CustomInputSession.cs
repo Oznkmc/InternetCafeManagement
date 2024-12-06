@@ -67,54 +67,54 @@ namespace InternetCafeManagement
         {
             string inputText = txtInput.Text.ToLower();
 
-            // "Sınırsız" oturum
-            //if (inputText == "sınırsız")
-            //{
-            //    if (user_balance >= 7.5)
-            //    {
-            //        oturumSuresi = 99999;
-            //        DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            //        if (result == DialogResult.Yes)
-            //        {
-            //            // Veritabanında bilgisayar durumunu "unavailable" olarak güncelle
-            //            UpdateComputerStatus("unavailable");
+            //sınırsız oturum
+            if (inputText == "sınırsız")
+            {
+                if (user_balance >= 7.5)
+                {
+                    oturumSuresi = 99999;
+                    DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        // Veritabanında bilgisayar durumunu "unavailable" olarak güncelle
+                        UpdateComputerStatus("unavailable");
 
-            //            // Oturum başlatma
-            //            UsersSession usersSession = new UsersSession
-            //            {
-            //                oturum_suresi = oturumSuresi,
-            //                user_role = this.user_role,
-            //                user_mail = this.user_mail,
-            //                user_balance = this.user_balance,
-            //                secili_pc = this.secili_pc
-            //            };
-            //            usersSession.Show();
-            //            this.Hide();
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // Yetersiz bakiye durumunda
-            //        MessageBox.Show("Lütfen Geçerli Bakiye Girin.");
-            //        txtInput.Clear();
-            //        DialogResult result2 = MessageBox.Show("Bakiye Sayfasına Yönlendirilmek İster Misin?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            //        if (result2 == DialogResult.Yes)
-            //        {
-            //            // Bilgisayar durumunu "available" yap
-            //            UpdateComputerStatus("available");
+                        // Oturum başlatma
+                        UsersSession usersSession = new UsersSession
+                        {
+                            oturum_suresi = oturumSuresi,
+                            user_role = this.user_role,
+                            user_mail = this.user_mail,
+                            user_balance = this.user_balance,
+                            secili_pc = this.secili_pc
+                        };
+                        usersSession.Show();
+                        this.Hide();
+                    }
+                }
+                else
+                {
+                    // Yetersiz bakiye durumunda
+                    MessageBox.Show("Lütfen Geçerli Bakiye Girin.");
+                    txtInput.Clear();
+                    DialogResult result2 = MessageBox.Show("Bakiye Sayfasına Yönlendirilmek İster Misin?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result2 == DialogResult.Yes)
+                    {
+                        // Bilgisayar durumunu "available" yap
+                        UpdateComputerStatus("available");
 
-            //            // Balance sayfasına yönlendir
-            //            Balance balance = new Balance
-            //            {
-            //                userbalance = this.user_balance,
-            //                usermail = this.user_mail,
-            //                userrole = this.user_role
-            //            };
-            //            balance.Show();
-            //            this.Hide();
-            //        }
-            //    }
-            //}
+                        // Balance sayfasına yönlendir
+                        Balance balance = new Balance
+                        {
+                            userbalance = this.user_balance,
+                            usermail = this.user_mail,
+                            userrole = this.user_role
+                        };
+                        balance.Show();
+                        this.Hide();
+                    }
+                }
+            }
             // Süreli oturum
             if (int.TryParse(txtInput.Text, out int parsedOturumSuresi) && parsedOturumSuresi > 0)
             {
@@ -127,7 +127,7 @@ namespace InternetCafeManagement
                         if (result == DialogResult.Yes)
                         {
                             oturumSuresi = parsedOturumSuresi;
-
+                            UpdateComputerStatus("unavailable");
                             // Oturum başlatma
                             UsersSession usersSession = new UsersSession
                             {
@@ -135,7 +135,9 @@ namespace InternetCafeManagement
                                 user_role = this.user_role,
                                 user_mail = this.user_mail,
                                 user_balance = this.user_balance,
-                                secili_pc = this.secili_pc
+                                secili_pc = this.secili_pc,
+                                hediyekullandi=false
+                                
                             };
                             usersSession.Show();
                             this.Hide();

@@ -163,11 +163,11 @@ namespace InternetCafeManagement
                 SqlCommand userIdCommand = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
                 userIdCommand.Parameters.AddWithValue("@UserMail", user_mail);
                 object userIdResult = userIdCommand.ExecuteScalar();
-                 userid = userIdResult != DBNull.Value ? Convert.ToInt32(userIdResult) : 0;
+                userid = userIdResult != DBNull.Value ? Convert.ToInt32(userIdResult) : 0;
 
                 // gift_duration'ı al
                 SqlCommand giftDurationCommand = new SqlCommand("SELECT gift_duration FROM gift_wheel WHERE user_id = @UserId", connection);
-                giftDurationCommand.Parameters.AddWithValue("@UserId", userid);
+                giftDurationCommand.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
                 object giftDurationResult = giftDurationCommand.ExecuteScalar();
                 double giftDuration = giftDurationResult != DBNull.Value ? Convert.ToDouble(giftDurationResult) : 0;
 
@@ -250,7 +250,7 @@ namespace InternetCafeManagement
                         {
                             SqlCommand giftUpdate = new SqlCommand(
                                 "UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserId AND is_claimed = 0", connection);
-                            giftUpdate.Parameters.AddWithValue("@UserId", user_id);
+                            giftUpdate.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
                             giftUpdate.ExecuteNonQuery();
                         }
 
@@ -272,13 +272,13 @@ namespace InternetCafeManagement
                         SqlCommand addSessions = new SqlCommand(
                             "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
                             "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)", connection);
-                        addSessions.Parameters.AddWithValue("@UserId", user_id);
+                        addSessions.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
                         SqlCommand computerid = new SqlCommand("select computer_id from computers where name=@ComputerName", connection);
                         computerid.Parameters.AddWithValue("@ComputerName", secili_pc);
-                        object ComputerResult=computerid.ExecuteScalar();
-                        if(ComputerResult != null)
+                        object ComputerResult = computerid.ExecuteScalar();
+                        if (ComputerResult != null)
                         {
-                             computeridtake = (int)ComputerResult;
+                            computeridtake = (int)ComputerResult;
                         }
                         addSessions.Parameters.AddWithValue("@ComputerId", computeridtake);
                         addSessions.Parameters.AddWithValue("@TotalPrice", sessionBalance);
@@ -311,19 +311,19 @@ namespace InternetCafeManagement
                 }
             }
         }
-    
+
         private int GetUserId(string email)
         {
             int userId = 0;
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                SqlCommand command = new SqlCommand("SELECT id FROM users WHERE email = @Email", connection);
+                SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email = @Email", connection);
                 command.Parameters.AddWithValue("@Email", email);
                 SqlDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    userId = Convert.ToInt32(reader["id"]);
+                    userId = Convert.ToInt32(reader["user_id"]);
                 }
             }
             return userId;
@@ -352,7 +352,7 @@ namespace InternetCafeManagement
         private void pictureBox5_Click(object sender, EventArgs e)
         {
             timer1.Stop();
-            MessageBox.Show((lasttime/60).ToString());
+            MessageBox.Show((lasttime / 60).ToString());
             AddTime add = new AddTime()
             {
                 user_balance = user_balance,
@@ -361,7 +361,7 @@ namespace InternetCafeManagement
                 oturum_suresi = lasttime,
                 session_balance = this.sessionBalance,
             };
-           
+
             add.Show();
             this.Hide();
         }
