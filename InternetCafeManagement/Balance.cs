@@ -21,7 +21,7 @@ namespace InternetCafeManagement
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
         public string usermail { get; set; }
         public double userbalance {  get; set; }
-        public string userrole { get; set; }
+        public bool userrole { get; set; }
         private void pictureBox1_Click(object sender, EventArgs e)
         {
 

@@ -24,7 +24,7 @@ namespace InternetCafeManagement
         SqlDataAdapter da = new SqlDataAdapter();
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
-        public string user_role { get; set; }
+        public bool user_role { get; set; }
         public string user_mail { get; set; }
         public double user_balance { get; set; }
         void griddoldur()
@@ -441,17 +441,7 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Ana Sayfaya Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
-            {
-                AnaSayfa anaSayfa = new AnaSayfa();
-                anaSayfa.user_role = this.user_role;
-                anaSayfa.user_balance = this.user_balance;
-                anaSayfa.user_mail = this.user_mail;
-
-                anaSayfa.Show();
-                this.Hide();
-            }
+          
         }
 
         private void pictureBox3_Click_1(object sender, EventArgs e)

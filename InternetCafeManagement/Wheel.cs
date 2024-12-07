@@ -21,7 +21,7 @@ namespace InternetCafeManagement
         private int counter = 0;
         public string usermail {  get; set; }
         public double user_balance { get; set; }
-        public string user_rol {  get; set; }
+        public bool user_rol {  get; set; }
         private void Wheel_Load(object sender, EventArgs e)
         {
             

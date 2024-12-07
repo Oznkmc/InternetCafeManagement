@@ -16,7 +16,7 @@ namespace InternetCafeManagement
         {
             InitializeComponent();
         }
-        public string user_role { get; set; }
+        public bool user_role { get; set; }
         public string user_mail { get; set; }
         public double user_balance { get; set; }
         public double session_balance { get; set; }

@@ -19,7 +19,7 @@ namespace InternetCafeManagement
         }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
 
-        public string user_role { get; set; }
+        public bool user_role { get; set; }
         public string user_mail { get; set; }
         public double user_balance { get; set; }
         public string secili_pc {  get; set; }

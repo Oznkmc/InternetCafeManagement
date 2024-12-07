@@ -177,7 +177,7 @@ namespace InternetCafeManagement
                         // Ana sayfa geçiş
                         AnaSayfa ana = new AnaSayfa();
                         ana.user_mail = txtMail.Text;
-                        ana.user_role =role.ToString();
+                        ana.user_role =role;
                         ana.user_balance = userbalance; // Bakiye burada atanabilir
 
                         // Rol kontrolü: role false ise Ana Sayfa'daki pictureBox1 gizlenir

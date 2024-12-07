@@ -23,7 +23,7 @@ namespace InternetCafeManagement
         SqlDataAdapter da = new SqlDataAdapter();
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
-        public string user_role { get; set; }
+        public bool user_role { get; set; }
         public string user_mail { get; set; }
         void griddoldur()
         {

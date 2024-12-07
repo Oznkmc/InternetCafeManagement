@@ -5,26 +5,26 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 
 namespace InternetCafeManagement
 {
-    public partial class SessionsInfo : Form
+    public partial class SessionInfo : Form
     {
-        public SessionsInfo()
+        public SessionInfo()
         {
             InitializeComponent();
         }
-        string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
+      
         SqlConnection con = new SqlConnection();
         SqlDataAdapter da = new SqlDataAdapter();
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
-        public string user_role { get; set; }
-        public string user_mail { get; set; }
       
+        public string user_mail { get; set; }
+        string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
         void griddoldur()
         {
 
@@ -36,20 +36,11 @@ namespace InternetCafeManagement
             dataGridView1.DataSource = ds.Tables["sessions"];
             con.Close();
         }
-        private void SessionsInfo_Load(object sender, EventArgs e)
-        {
 
+        public bool user_role { get; set; }
+        private void SessionInfo_Load(object sender, EventArgs e)
+        {
             griddoldur();
-        }
-
-        private void pictureBox3_Click(object sender, EventArgs e)
-        {
-            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
-            {
-                Application.Exit();
-            }
-
         }
 
         private void pictureBox4_Click(object sender, EventArgs e)
@@ -59,11 +50,20 @@ namespace InternetCafeManagement
             {
                 admin Admin = new admin();
                 Admin.role = this.user_role;
-               
+
                 Admin.usermail = this.user_mail;
 
                 Admin.Show();
                 this.Hide();
+            }
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
             }
         }
     }

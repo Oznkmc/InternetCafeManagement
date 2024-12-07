@@ -16,9 +16,10 @@ namespace InternetCafeManagement
         {
             InitializeComponent();
         }
-        public string role {  get; set; }
+        public bool role {  get; set; }
         public string usermail {  get; set; }
         public double balance {  get; set; }
+
 
         private void admin_Load(object sender, EventArgs e)
         {
@@ -39,12 +40,10 @@ namespace InternetCafeManagement
 
         private void ComputersBox_Click(object sender, EventArgs e)
         {
-            SessionsInfo sessions= new SessionsInfo
-            {
-                user_mail= usermail,
-                user_role= role,
-            };
-            sessions.Show();
+            SessionInfo sessionInfo = new SessionInfo();
+            sessionInfo.user_role = role;
+            sessionInfo.user_mail = usermail;
+            sessionInfo.Show();
             this.Hide();
 
         }
@@ -81,6 +80,18 @@ namespace InternetCafeManagement
             {
                 Application.Exit();
             }
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+            WheelInfo wheelInfo = new WheelInfo
+            {
+                usermail = this.usermail
+            };
+            wheelInfo.Show();
+            this.Hide();
+
+
         }
     }
 }

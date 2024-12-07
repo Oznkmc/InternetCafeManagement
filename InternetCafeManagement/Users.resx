@@ -121,7 +121,7 @@
   <data name="pictureUpdate.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAL
-        DwAACw8BkvkDpQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAFI9SURBVHhe7d0J
+        DgAACw4BQL7hQQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAFI9SURBVHhe7d0J
         mB1VmTfwsK+KrCG3b1V1J4GQdGftoAzuoygqjoyKzriPn+KKgHZ3cBuvDuk61R2T9JKEjNuI25ARRNGQ
         ToAIKIpGIEtVddJrEnY0bCFkv997Oi8aqk9IL/eeOlX1/z3P/2HGB5K3TlWdc+69VeeMAYDsGbdqzltz
         Kxt+neuof4yyY1xH/b3jVtR9snpZ4Vj+VwAAACBNKlbUL6RBv3iIrKtYWT+D/1UAAABIg9yKhs8rBv1o
@@ -479,7 +479,7 @@
   <data name="pictureDelete.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        vwAADr8BOAVTJAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAACYLSURBVHhe7d0L
+        vgAADr4B6kKxwAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAACYLSURBVHhe7d0L
         sGVZWdjxNdP77Ns9ThDCS0QoQYqICIggEUUUERBBBEWBImBQJAoWiAQMiIQIKoaoUJSA8mYCiCiOPCYQ
         IkgREeVR4AiKEyiUR0DCIIKQ7nPOnKwjX6eofdfQ97H3Oevs/ftX/ap9zNzbtddjf7en+3aSxtSZNLvl
         PLVPXKTZ/5in2Xvzj5dnKziCz+Q99L78Y95L7RPz3vqm2GaSpBpapXTeIrX3zZf133QucOhV3mN/nffa
@@ -648,7 +648,7 @@
   <data name="pictrureAdd.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wAAADsABataJCQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAADKySURBVHhe7d0J
+        vwAADr8BOAVTJAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAADKySURBVHhe7d0J
         nF1lffDxG/ZNEKu1UhXUqq24p+5KBxtD7lme58zgFVsWBTVVq2LpkrYqDq6079v6Ilqb2jYCLu3tnHNm
         khiNClEkIBrFhU0UENmXJCxCtknu+zyTP00495lklnPu3HPO79fP94PNTGbunHvO8/yT3KVBRP3dwJqB
         /U6Ih56iRtQLvUS9wU9Uy0+jxUEa/Y0XR5/wY/Uv5te+7Cd6zE/1N81/LzfW+bH+hXGT+d8bMrYanQz7

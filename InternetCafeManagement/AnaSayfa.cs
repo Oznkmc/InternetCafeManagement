@@ -16,21 +16,13 @@ namespace InternetCafeManagement
         {
             InitializeComponent();
         }
-        public string user_role { get; set; }
+        public bool user_role { get; set; }
         public string user_mail {  get; set; }
         public double user_balance { get; set; }
 
         private void AnaSayfa_Load(object sender, EventArgs e)
         {
-            if(user_role== "Admin")
-            {
-                picAdmin.Visible = true;
-
-            }
-            else
-            {
-                picAdmin.Visible=false;
-            }
+            picAdmin.Visible = user_role;
         }
 
         private void SessionBox_Click(object sender, EventArgs e)
