@@ -24,7 +24,9 @@ namespace InternetCafeManagement
         SqlDataAdapter da = new SqlDataAdapter();
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
-
+        public string user_role { get; set; }
+        public string user_mail { get; set; }
+        public double user_balance { get; set; }
         void griddoldur()
         {
             con = new SqlConnection(connectionString);
@@ -257,36 +259,99 @@ namespace InternetCafeManagement
 
         private void pictureAdd_Click(object sender, EventArgs e)
         {
-            try
+            string mailkontrol = txtMail.Text;
+            bool mailsyntax = false;
+
+            if (mailkontrol.EndsWith("@gmail.com"))
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                mailsyntax = true;
+            }
+            else
+            {
+                mailsyntax = false;
+            }
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                try
                 {
                     connection.Open();
-                    SqlCommand AddUser = new SqlCommand("insert into users(firstname,lastname,password,email,phonenumber,balance) values(@FirstName,@LastName,@Password,@email,@phone,@balance)", connection);
-                    AddUser.Parameters.AddWithValue("@Firstname", txtFirstName.Text);
-                    AddUser.Parameters.AddWithValue("@LastName", txtLastName.Text);
-                    AddUser.Parameters.AddWithValue("@Password", txtPassword.Text);
-                    AddUser.Parameters.AddWithValue("@email", txtMail.Text);
-                    AddUser.Parameters.AddWithValue("@phone", txtPhone.Text);
-                    AddUser.Parameters.AddWithValue("@balance", Balance.Text);
-                    AddUser.ExecuteNonQuery();
-                    MessageBox.Show("Kullanıcı Başarıyla Eklenmiştir.");
-                    griddoldur();
-                    txtFirstName.Clear();
-                    txtLastName.Clear();
-                    txtPassword.Clear();
-                    txtMail.Clear();
-                    txtPhone.Clear();
-                    Balance.Clear();
-                    txtPassword.Clear();
 
+                    // Mail kontrolü için sorgu
+                    SqlCommand MailKontrol = new SqlCommand("SELECT * FROM users WHERE email = @UserMail", connection);
+                    MailKontrol.Parameters.AddWithValue("@UserMail", txtMail.Text);
+
+                    SqlDataReader dr = MailKontrol.ExecuteReader();
+
+                    if (dr.Read())
+                    {
+                        MessageBox.Show("Böyle bir mail adresi zaten mevcut.");
+                    }
+                    else
+                    {
+                        // DataReader'ı kapat
+                        dr.Close();
+
+                        if (mailsyntax && txtPhone.Text.Length == 10)
+                        {
+                            // Yeni kullanıcı ekleme
+                            SqlCommand AddUser = new SqlCommand(
+                                "INSERT INTO users(firstname, lastname, password, email, phonenumber, balance) " +
+                                "VALUES(@FirstName, @LastName, @Password, @Email, @Phone, @Balance)",
+                                connection);
+
+                            AddUser.Parameters.AddWithValue("@FirstName", txtFirstName.Text);
+                            AddUser.Parameters.AddWithValue("@LastName", txtLastName.Text);
+                            AddUser.Parameters.AddWithValue("@Password", txtPassword.Text);
+                            AddUser.Parameters.AddWithValue("@Email", txtMail.Text);
+                            AddUser.Parameters.AddWithValue("@Phone", txtPhone.Text);
+                            AddUser.Parameters.AddWithValue("@Balance", Balance.Text);
+
+                            AddUser.ExecuteNonQuery();
+
+                            MessageBox.Show("Kullanıcı Başarıyla Eklenmiştir.");
+
+                            
+                        }
+                        else if (!mailsyntax)
+                        {
+                            MessageBox.Show("Mail Adresiniz Uyumsuz.");
+                        }
+
+                        if (txtPhone.Text.Length != 10)
+                        {
+                            MessageBox.Show("Telefon Numarası en az 10 haneli olmalı.");
+                        }
+                        griddoldur();
+
+                        // Form alanlarını temizle
+                        txtFirstName.Clear();
+                        txtLastName.Clear();
+                        txtPassword.Clear();
+                        txtMail.Clear();
+                        txtPhone.Clear();
+                        Balance.Clear();
+                    }
+
+                    // DataReader açık kalmışsa kapat
+                    if (!dr.IsClosed)
+                    {
+                        dr.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Hatanızın Nedeni: " + ex.Message);
+                }
+                finally
+                {
+                    connection.Close();
                 }
             }
-            catch(Exception ex)
-            {
-                MessageBox.Show("Hatanızın Nedeni:" + ex.Message);
-            }
-         
+
+
+
+
         }
 
         private void pictureDelete_Click(object sender, EventArgs e)
@@ -304,22 +369,24 @@ namespace InternetCafeManagement
             using (SqlConnection connection=new SqlConnection(connectionString))
             {
                 connection.Open();
-                SqlCommand user_id = new SqlCommand("select user_id from where email=@UserMail", connection);
+                SqlCommand user_id = new SqlCommand("select user_id from users where email=@UserMail", connection);
                 user_id.Parameters.AddWithValue("@UserMail", txtMail.Text);
-                object result= user_id.ExecuteNonQuery();
+                object result = user_id.ExecuteScalar();
                 if(result!=null)
                 {
                     try
                     {
                         int idgetir = (int)result;
                         SqlCommand UpdateUser = new SqlCommand("UPDATE users set firstname=@FirstName,lastname=@LastName,password=@password,email=@email,phonenumber=@Phonenumber,balance=@balance where user_id=@userid", connection);
-                        UpdateUser.Parameters.AddWithValue("userid", user_id);
-                        UpdateUser.Parameters.AddWithValue("FirstName", txtFirstName.Text);
+                        UpdateUser.Parameters.AddWithValue("userid", idgetir);
+                        UpdateUser.Parameters.AddWithValue("@FirstName", txtFirstName.Text);
+                        UpdateUser.Parameters.AddWithValue("@LastName", txtLastName.Text);
                         UpdateUser.Parameters.AddWithValue("@password", txtPassword.Text);
                         UpdateUser.Parameters.AddWithValue("@email", txtMail.Text);
                         UpdateUser.Parameters.AddWithValue("@phonenumber", txtPhone.Text);
                         UpdateUser.Parameters.AddWithValue("@balance", Convert.ToInt32(Balance.Text));
                         UpdateUser.ExecuteNonQuery();
+                        griddoldur();
                         MessageBox.Show("Kullanıcı Başarıyla Güncellenmiştir.");
                     }
                     catch(Exception ex)
@@ -362,9 +429,38 @@ namespace InternetCafeManagement
                 txtMail.Text = row.Cells["email"].Value.ToString();
                 txtPhone.Text = row.Cells["phonenumber"].Value.ToString();
                 Balance.Text = row.Cells["balance"].Value.ToString();
-               
+                
             }
 
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Ana Sayfaya Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                AnaSayfa anaSayfa = new AnaSayfa();
+                anaSayfa.user_role = this.user_role;
+                anaSayfa.user_balance = this.user_balance;
+                anaSayfa.user_mail = this.user_mail;
+
+                anaSayfa.Show();
+                this.Hide();
+            }
+        }
+
+        private void pictureBox3_Click_1(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
         }
     }
 }

@@ -267,15 +267,15 @@ namespace InternetCafeManagement
 
 
                         }
-                        else if (txtphone.Text.Length != 12 || txtphone.Text.Length != 10)
+                       else  if (txtphone.Text.Length != 12 || txtphone.Text.Length != 10)
                         {
                             MessageBox.Show("Telefon numarası 10 haneli olmalıdır!");
                         }
-                        else if (txtPassword.Text != txtAgainPassword.Text)
+                       else  if (txtPassword.Text != txtAgainPassword.Text)
                         {
                             MessageBox.Show("Şifreler uyuşmuyor!");
                         }
-                        else if (mailsyntax == false)
+                       else  if (mailsyntax == false)
                         {
                             MessageBox.Show("Mailinizi doğru girdiğinizden emin olun.");
                         }
