@@ -194,13 +194,16 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Oturum Menüsüne Dönmeye Emin Misin?");
+            DialogResult result = MessageBox.Show("Oturum Sayfasına Dönüyorsun. Emin Misin?", "Geri Dön", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
-                Sessions sessions = new Sessions();
-                sessions.user_balance = this.user_balance;
-                sessions.user_mail = this.user_mail;
-                sessions.user_role = this.user_role;
+               Sessions sessions = new Sessions
+               {
+                   user_mail = this.user_mail,
+                   user_balance = this.user_balance,
+                   user_role = this.user_role,
+                   
+               }
                 sessions.Show();
                 this.Hide();
             }

@@ -74,11 +74,23 @@ namespace InternetCafeManagement
             counter++;
 
             // Rastgele bir hediye seç ve textBox1'e yazdır
-            int rastgelesayi = rnd.Next(0, hediyeler.Count);
-            textBox1.Text = hediyeler[rastgelesayi].ToString();
+            if (hediyeler.Count > 0)
+            {
+                int rastgelesayi = rnd.Next(0, hediyeler.Count);
+                textBox1.Text = hediyeler[rastgelesayi].ToString();
+
+                // Seçilen hediyeyi listeden çıkar
+                hediyeler.RemoveAt(rastgelesayi);
+            }
+            else
+            {
+                MessageBox.Show("Hediye kalmadı!");
+                timer1.Stop();
+                return;
+            }
 
             // Eğer counter 10'a ulaştıysa, timer'ı durdur ve kazandığınız hediyeyi göster
-            if(user_balance>199)
+            if (user_balance > 199)
             {
                 if (counter == 10)
                 {
@@ -114,7 +126,6 @@ namespace InternetCafeManagement
                             balance_update.Parameters.AddWithValue("@UserBalance", user_balance);
                             balance_update.Parameters.AddWithValue("Userid", userid);
                             balance_update.ExecuteNonQuery();
-                            
 
                         }
                         catch (Exception exception)
@@ -137,14 +148,13 @@ namespace InternetCafeManagement
             {
                 MessageBox.Show("Bakiyenizde en az 200 lira bulunmalıdır.");
             }
-           
-
         }
-        private   ArrayList hediyeler = new ArrayList();
+
+        private ArrayList hediyeler = new ArrayList();
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
+
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-
             hediyeler.Clear(); // Eğer sürekli ekleme yapılıyorsa listeyi temizleyin
             hediyeler.Add("1 saat ücretsiz oturum");
             hediyeler.Add("3 saat ücretsiz oturum");
@@ -171,22 +181,22 @@ namespace InternetCafeManagement
             if (!timer1.Enabled)
             {
                 counter = 0; // Timer tekrar başlatıldığında sayaç sıfırlansın
-                if(user_balance>199)
+                if (user_balance > 199)
                 {
-                  timer1.Start(); // Timer başlat
+                    timer1.Start(); // Timer başlat
                 }
                 else
                 {
-                    MessageBox.Show("Bakiyenizde en az 200 lira bulunmalıdır.\n Sizin Bakiyeniz:"+user_balance);
+                    MessageBox.Show("Bakiyenizde en az 200 lira bulunmalıdır.\n Sizin Bakiyeniz:" + user_balance);
                 }
             }
             else
             {
-               
                 timer1.Stop(); // Timer durdur
                 counter = 0; // Sayaç sıfırlansın
             }
         }
+
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {

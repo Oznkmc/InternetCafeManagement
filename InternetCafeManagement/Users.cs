@@ -441,7 +441,17 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-          
+            DialogResult result = MessageBox.Show("Anasayfaya Dönüyorsun. Emin Misin?", "Geri Dön", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                AnaSayfa ana = new AnaSayfa
+                {
+                    user_mail = user_mail,
+                    user_role = user_role
+                };
+                ana.Show();
+                this.Hide();
+            }
         }
 
         private void pictureBox3_Click_1(object sender, EventArgs e)

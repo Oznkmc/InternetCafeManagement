@@ -22,8 +22,8 @@ namespace InternetCafeManagement
         SqlDataAdapter da = new SqlDataAdapter();
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
-        public string usermail {get; set;}
-        public bool user_role { get; set;}
+        public string usermail { get; set; }
+        public bool user_role { get; set; }
         void griddoldur()
         {
 
@@ -68,6 +68,9 @@ namespace InternetCafeManagement
         private void WheelInfo_Load(object sender, EventArgs e)
         {
             griddoldur();
+            cmbIsClaimed.Items.Add("True");
+            cmbIsClaimed.Items.Add("False");
+
         }
 
         private void pictrureAdd_Click(object sender, EventArgs e)
@@ -82,19 +85,19 @@ namespace InternetCafeManagement
                     SqlCommand user_id = new SqlCommand("select spin_id from users where user_id=@UserID", connection);
                     SqlCommand IDcommand = new SqlCommand("select user_id from users email=@UserMail", connection);
                     IDcommand.Parameters.AddWithValue("@UserMail", usermail);
-                    object result=IDcommand.ExecuteScalar();
-                    if(result!=null)
+                    object result = IDcommand.ExecuteScalar();
+                    if (result != null)
                     {
                         int userid = (int)result;
                         user_id.Parameters.AddWithValue("userID", userid);
-                        
+
 
                         object result1 = user_id.ExecuteScalar();
                         if (result1 == null)
                         {
 
                             SqlCommand AddGift = new SqlCommand("insert into gift_wheel(user_id,reward,is_claimed,gift_duration,used_time) values(@userid,@reward,@is_claimed,@gift_duration,used_time) ", connection);
-                            AddGift.Parameters.AddWithValue("@userid", txtKullanıcıID.Text);
+                            AddGift.Parameters.AddWithValue("@userid", Convert.ToInt32(txtKullanıcıID.Text));
                             AddGift.Parameters.AddWithValue("@reward", txtReward.Text);
                             AddGift.Parameters.AddWithValue("@is_claimed", Convert.ToBoolean(cmbIsClaimed.Text));
                             AddGift.Parameters.AddWithValue("@gift_duration", Convert.ToInt32(txtGiftDuration.Text));
@@ -108,7 +111,7 @@ namespace InternetCafeManagement
                             MessageBox.Show("Bu kullanıcıya ait tanımlı bir hediye zaten mevcut.");
                         }
                     }
-                  
+
                 }
                 catch (Exception ex)
                 {
@@ -131,38 +134,37 @@ namespace InternetCafeManagement
                 // TextBoxlara seçili satırın değerlerini aktar
                 txtKullanıcıID.Text = row.Cells["user_id"].Value.ToString();
                 txtReward.Text = row.Cells["reward"].Value.ToString();
-               cmbIsClaimed.Text = row.Cells["is_claimed"].Value.ToString();
+                cmbIsClaimed.Text = row.Cells["is_claimed"].Value.ToString();
                 txtGiftDuration.Text = row.Cells["gift_duration"].Value.ToString();
                 txtUsedTime.Text = row.Cells["used_time"].Value.ToString();
-               
-
             }
         }
 
         private void pictureDelete_Click(object sender, EventArgs e)
         {
-            using (SqlConnection connection=new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 try
                 {
                     connection.Open();
-                    SqlCommand command = new SqlCommand("select user_id from users where email=@UserMail", connection);
+                    SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email=@UserMail", connection);
                     command.Parameters.AddWithValue("@UserMail", usermail);
                     object result = command.ExecuteScalar();
-                    if(result!=null)
+                    if (result != null)
                     {
                         int id = (int)result;
-                        KayıtSil(id); 
+                        KayıtSil(id);
                         griddoldur();
                     }
-                   
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Hatanızın Nedeni:" + ex.Message);
+                    MessageBox.Show("Hatanızın Nedeni: " + ex.Message);
                 }
-                finally { connection.Close(); }
-               
+                finally
+                {
+                    connection.Close();
+                }
             }
         }
 
@@ -172,7 +174,6 @@ namespace InternetCafeManagement
             {
                 try
                 {
-                    // Bağlantıyı aç
                     connection.Open();
 
                     // SQL komutunu hazırla
@@ -181,10 +182,9 @@ namespace InternetCafeManagement
                         connection);
 
                     // Parametreleri ekle
-                    int userId, duration, usedTime;
-                    if (!int.TryParse(txtKullanıcıID.Text, out userId) ||
-                        !int.TryParse(txtGiftDuration.Text, out duration) ||
-                        !int.TryParse(txtUsedTime.Text, out usedTime))
+                    if (!int.TryParse(txtKullanıcıID.Text, out int userId) ||
+                        !int.TryParse(txtGiftDuration.Text, out int duration) ||
+                        !int.TryParse(txtUsedTime.Text, out int usedTime))
                     {
                         MessageBox.Show("Lütfen geçerli bir sayı giriniz.");
                         return;
@@ -196,20 +196,17 @@ namespace InternetCafeManagement
                     command.Parameters.AddWithValue("@duration", duration);
                     command.Parameters.AddWithValue("@used_time", usedTime);
 
-                    // SQL komutunu çalıştır
                     command.ExecuteNonQuery();
                     griddoldur();
-                    // Başarı mesajı
+
                     MessageBox.Show("Kullanıcının Hediyesi Başarıyla Güncellenmiştir.");
                 }
                 catch (Exception ex)
                 {
-                    // Hata mesajı
                     MessageBox.Show("Hatanızın Nedeni: " + ex.Message);
                 }
                 finally
                 {
-                    // Bağlantıyı kapat
                     connection.Close();
                 }
             }
@@ -222,12 +219,14 @@ namespace InternetCafeManagement
             {
                 admin Admin = new admin
                 {
-                    role = this.user_role;
-                    usermail = this.usermail;
+                    role = this.user_role,
+                    usermail = this.usermail
                 };
-              
+
                 this.Hide();
+                Admin.Show(); // Admin formunu göster
             }
+        }
 
         private void pictureBox3_Click(object sender, EventArgs e)
         {
@@ -238,5 +237,6 @@ namespace InternetCafeManagement
             }
         }
     }
-    }
 }
+
+

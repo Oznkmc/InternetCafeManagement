@@ -439,7 +439,12 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click_1(object sender, EventArgs e)
         {
+            DialogResult result = MessageBox.Show("Anasayfaya Döneceksin.Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
+            if (result == DialogResult.Yes)
+            {
+                OturumuKapat(false); // Uygulamayı kapat seçeneği ile oturumu kapat
+            }
         }
     }
 }
