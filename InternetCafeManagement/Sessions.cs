@@ -83,6 +83,7 @@ namespace InternetCafeManagement
                 }
             }
         }
+       private int remainingTime;
         private void picturePC1_Click(object sender, EventArgs e)
         {
             try
@@ -123,12 +124,12 @@ namespace InternetCafeManagement
                     reader.Close();
 
                     // Eğer hediye zaten kullanıldıysa, CustomInputSession'ı aç
-                    if (isClaimed)
-                    {
-                        MessageBox.Show("Hediyeniz zaten kullanıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        OpenCustomInputSession();
-                        return;
-                    }
+                    //if (isClaimed)
+                    //{
+                    //    MessageBox.Show("Hediyeniz zaten kullanıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    //    OpenCustomInputSession();
+                    //    return;
+                    //}
 
                     // Eğer hediye 1 veya 3 saat ücretsiz oturumsa
                     if (reward == "1 saat ücretsiz oturum" || reward == "3 saat ücretsiz oturum")
@@ -137,41 +138,58 @@ namespace InternetCafeManagement
 
                         if (result2 == DialogResult.Yes)
                         {
-                            int remainingTime = giftDuration - usedTime; // Kalan süreyi hesapla
-                            if (remainingTime <= 0)
+                            //int remainingTime = (giftDuration) - usedTime; // Kalan süreyi hesapla
+                            //if (remainingTime <= 0)
+                            //{
+                            //    MessageBox.Show("Hediye süresi tamamlanmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            //    OpenCustomInputSession();
+                            //    return;
+                            //}
+                            SqlCommand command = new SqlCommand("select is_claimed from gift_wheel where user_id=@UserID", connection);
+                            command.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
+                            object resultClaimed = command.ExecuteScalar();
+
+
+                            SqlCommand command1 = new SqlCommand("SELECT ABS((gift_duration * 60) - used_time) FROM gift_wheel WHERE user_id=@UserID;", connection);
+                            command1.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
+                            object resultcommand1 = command1.ExecuteScalar();
+
+                            if (resultcommand1 != null && resultcommand1 != DBNull.Value)
                             {
-                                MessageBox.Show("Hediye süresi tamamlanmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                OpenCustomInputSession();
-                                return;
+                                int absGift = (int)resultcommand1;
+                                if (absGift > 0)
+                                {
+                                    remainingTime = absGift; // Kalan zamanı doğrudan alıyoruz
+                                    parsedOturumSuresi = remainingTime; // Kalan süreyi saniye olarak alıyoruz
+
+                                    // Kullanıcı oturumu başlat
+                                    UsersSession usersSessionGift = new UsersSession
+                                    {
+                                        oturum_suresi = parsedOturumSuresi,
+                                        user_role = this.user_role,
+                                        user_mail = this.user_mail,
+                                        user_balance = this.user_balance,
+                                        secili_pc = "PC1", // Seçilen bilgisayar
+                                        hediyekullandi = true,
+                                    };
+                                    this.Hide();
+                                    usersSessionGift.Show();
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Hedef Zaten Tamamlanmış.");
+                                    OpenCustomInputSession();
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show("Hediye süresi bulunamadı.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
 
-                            parsedOturumSuresi = remainingTime * 60; // Kalan süreyi saniyeye çevir
 
-                            // Kullanıcı oturumu başlat
-                            UsersSession usersSessionGift = new UsersSession
-                            {
-                                oturum_suresi = parsedOturumSuresi,
-                                user_role = this.user_role,
-                                user_mail = this.user_mail,
-                                user_balance = this.user_balance,
-                                secili_pc = "PC1", // Seçilen bilgisayar
-                                hediyekullandi = true,
-                            };
 
-                            // Hediye kullanıldıktan sonra 'used_time' güncelleniyor
-                            SqlCommand updateUsedTime = new SqlCommand("UPDATE gift_wheel SET used_time = ISNULL(used_time, 0) + @UsedTime, is_claimed = 1 WHERE user_id = @UserID", connection);
-                            updateUsedTime.Parameters.AddWithValue("@UsedTime", remainingTime); // Kalan süre kadar kullanılan süreyi ekle
-                            updateUsedTime.Parameters.AddWithValue("@UserID", idtake);
-                            updateUsedTime.ExecuteNonQuery(); // Güncellemeyi yap
-
-                            this.Hide();
-                            usersSessionGift.Show();
-                            return;
                         }
                     }
-
-                    // Eğer hediye kabul edilmezse veya başka ödül varsa
-                    OpenCustomInputSession();
                 }
             }
             catch (Exception ex)
@@ -184,9 +202,29 @@ namespace InternetCafeManagement
 
 
         }
+        private int GetUserId(string email)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email = @Email", connection);
+                    command.Parameters.AddWithValue("@Email", email);
+
+                    object userId = command.ExecuteScalar();
+                    return userId != null ? Convert.ToInt32(userId) : 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Kullanıcı ID alınırken bir hata oluştu: " + ex.Message);
+                return 0;
+            }
+        }
 
         // CustomInputSession açma işlemi
-     private   void OpenCustomInputSession()
+        private void OpenCustomInputSession()
         {
             CustomInputSession customInputSession = new CustomInputSession
             {

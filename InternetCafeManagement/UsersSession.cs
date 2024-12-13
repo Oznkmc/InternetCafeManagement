@@ -204,38 +204,34 @@ namespace InternetCafeManagement
         public int lasttime;
         int saat = 0;
         private int computeridtake;
-      
-            private void timer1_Tick(object sender, EventArgs e)
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            saniye++;
+            lasttime = oturum_suresi - saniye;
+            label4.Text = "Kalan Süre: " + lasttime.ToString();
+            saniye2++;
+
+            if (saniye <= oturum_suresi)
             {
-                saniye++;
-                lasttime = oturum_suresi - saniye;
-                label4.Text = "Kalan Süre: " + lasttime.ToString();
-                saniye2++;
-
-                if (saniye <= oturum_suresi)
+                if (hediyekullandi)
                 {
-                    if (hediyekullandi)
-                    {
-                        // Hediye kullanılıyorsa, sadece zaman işlemleri yapılacak
-                        UpdateUsedGiftTime(lasttime);
-                       //gift duration ve used_time sorunu var çözmeliyiz
-                    }
-                    else
-                    {
-                       //user_balance -= sessionBalance;
-
-                    UpdateLabels();
-                }
-
-                  
+                    // Hediye kullanılıyorsa sadece zaman işlemleri yapılır.
+                    UpdateUsedGiftTime(1); // Her Tick için 1 saniye eklenir.
                 }
                 else
                 {
-                    timer1.Stop();
-                    MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor...");
-                    FinalizeSession();
+                    // Hediye kullanılmıyorsa oturum ücretlendirmesi yapılır.
+                    UpdateLabels();
                 }
             }
+            else
+            {
+                // Süre dolduğunda oturum sonlandırılır.
+                timer1.Stop();
+                MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor...");
+                FinalizeSession();
+            }
+        }
 
         private void UpdateLabels()
         {
@@ -243,14 +239,14 @@ namespace InternetCafeManagement
             if (saniye % 60 == 0)
             {
                 dakika++;
-                sessionBalance += (dakika * 0.25f); // Oturum süresi ücretlendirme mantığı
-                saniye2 = 0;
+                sessionBalance += (dakika * 0.25f); // Dakika başına ücretlendirme
+                saniye2 = 0; // Ekran için saniye sıfırlanır
             }
 
             if (dakika == 60)
             {
                 saat++;
-                dakika = 0; // Dakika sıfırlanır
+                dakika = 0; // Saat tamamlanırsa dakika sıfırlanır
             }
 
             // Etiketleri güncelle
@@ -260,15 +256,22 @@ namespace InternetCafeManagement
 
         private void UpdateUsedGiftTime(int elapsedSeconds)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            try
             {
-                connection.Open();
-                SqlCommand updateGiftTime = new SqlCommand(
-                    "UPDATE gift_wheel SET used_time = used_time + @ElapsedSeconds WHERE user_id = @UserId AND is_claimed = 0",
-                    connection);
-                updateGiftTime.Parameters.AddWithValue("@ElapsedSeconds", elapsedSeconds);
-                updateGiftTime.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
-                updateGiftTime.ExecuteNonQuery();
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    SqlCommand updateGiftTime = new SqlCommand(
+                        "UPDATE gift_wheel SET used_time = used_time + @ElapsedSeconds WHERE user_id = @UserId AND is_claimed = 1",
+                        connection);
+                    updateGiftTime.Parameters.AddWithValue("@ElapsedSeconds", elapsedSeconds);
+                    updateGiftTime.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
+                    updateGiftTime.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hediye zamanı güncellenirken bir hata oluştu: " + ex.Message);
             }
         }
 
@@ -276,14 +279,11 @@ namespace InternetCafeManagement
         {
             try
             {
-                string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
-                string endTimeString = end_time.ToString("yyyy-MM-dd HH:mm:ss");
-
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
 
-                    // Hediye durumu kontrolü
+                    // Hediye durumu kontrolü ve güncellenmesi
                     if (!hediyekullandi)
                     {
                         SqlCommand markGiftClaimed = new SqlCommand(
@@ -294,51 +294,34 @@ namespace InternetCafeManagement
 
                     // Bilgisayar durumunu güncelle
                     SqlCommand updateComputerStatus = new SqlCommand(
-                        "UPDATE computers SET status = 'available' WHERE name = @ComputerName",
-                        connection);
+                        "UPDATE computers SET status = 'available' WHERE name = @ComputerName", connection);
                     updateComputerStatus.Parameters.AddWithValue("@ComputerName", secili_pc);
                     updateComputerStatus.ExecuteNonQuery();
 
+                    // Oturum güncellemesi
+                    SqlCommand getSessionId = new SqlCommand(
+                        "SELECT session_id FROM sessions WHERE user_id = @UserId AND status = 1", connection);
+                    getSessionId.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
+                    object sessionIdResult = getSessionId.ExecuteScalar();
 
-                    SqlCommand SessionID = new SqlCommand("select session_id from sessions where user_id=@GetUserID  and status=1", connection);
-                    SessionID.Parameters.AddWithValue("@GetUserID", GetUserId(user_mail));
-                    object result7 = SessionID.ExecuteScalar();
-                    if (result7 != null)
+                    if (sessionIdResult != null)
                     {
-                        int SessionIDgetir = (int)result7;
-                        SqlCommand UpdateSession = new SqlCommand("Update sessions set total_price=@TotalPrice,end_time=@EndDate,status=0 where session_id=@SessionID", connection);
-                        UpdateSession.Parameters.AddWithValue("@TotalPrice", totalprice); // Doğru `totalprice` değerini burada kullan
-                        UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                        UpdateSession.Parameters.AddWithValue("@SessionID", SessionIDgetir);
-                        int row = UpdateSession.ExecuteNonQuery();
-                        if (row != 0)
+                        int sessionId = (int)sessionIdResult;
+
+                        SqlCommand updateSession = new SqlCommand(
+                            "UPDATE sessions SET total_price = @TotalPrice, end_time = @EndDate, status = 0 WHERE session_id = @SessionID",
+                            connection);
+                        updateSession.Parameters.AddWithValue("@TotalPrice", totalprice); // Oturum toplam ücreti
+                        updateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        updateSession.Parameters.AddWithValue("@SessionID", sessionId);
+
+                        int rowsAffected = updateSession.ExecuteNonQuery();
+                        if (rowsAffected > 0)
                         {
-                            MessageBox.Show("Oturum Başarıyla Güncellenmiştir.Bir Daha Bekleriz.");
+                            MessageBox.Show("Oturum başarıyla güncellenmiştir. Bir daha bekleriz.");
                         }
                     }
-
                 }
-
-                //// Kullanıcıya seçenek sun
-                //DialogResult result = MessageBox.Show(
-                //    "Hediye süreniz dolmuştur. Oturum açmak ister misiniz?",
-                //    "Süre Doldu",
-                //    MessageBoxButtons.YesNo);
-
-                //if (result == DialogResult.Yes)
-                //{
-                //    CustomInputSession customSession = new CustomInputSession
-                //    {
-                //        user_mail = user_mail,
-                //        user_role = user_role
-                //    };
-                //    customSession.Show();
-                //    this.Hide();
-                //}
-                //else
-                //{
-                //    Application.Exit();
-                //}
             }
             catch (Exception ex)
             {
@@ -346,42 +329,47 @@ namespace InternetCafeManagement
             }
         }
 
-
-
         private int GetUserId(string email)
         {
-            int userId = 0;
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            try
             {
-                connection.Open();
-                SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email = @Email", connection);
-                command.Parameters.AddWithValue("@Email", email);
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    userId = Convert.ToInt32(reader["user_id"]);
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email = @Email", connection);
+                    command.Parameters.AddWithValue("@Email", email);
+
+                    object userId = command.ExecuteScalar();
+                    return userId != null ? Convert.ToInt32(userId) : 0;
                 }
             }
-            return userId;
+            catch (Exception ex)
+            {
+                MessageBox.Show("Kullanıcı ID alınırken bir hata oluştu: " + ex.Message);
+                return 0;
+            }
         }
 
         private int GetComputerId(string computerName)
         {
-            int computerId = 0;
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            try
             {
-                connection.Open();
-                SqlCommand command = new SqlCommand("SELECT computer_id FROM computers WHERE name = @ComputerName", connection);
-                command.Parameters.AddWithValue("@ComputerName", computerName);
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    computerId = Convert.ToInt32(reader["computer_id"]);
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("SELECT computer_id FROM computers WHERE name = @ComputerName", connection);
+                    command.Parameters.AddWithValue("@ComputerName", computerName);
+
+                    object computerId = command.ExecuteScalar();
+                    return computerId != null ? Convert.ToInt32(computerId) : 0;
                 }
             }
-            return computerId;
+            catch (Exception ex)
+            {
+                MessageBox.Show("Bilgisayar ID alınırken bir hata oluştu: " + ex.Message);
+                return 0;
+            }
         }
-
 
 
 
@@ -546,6 +534,12 @@ namespace InternetCafeManagement
                         int row=UpdateSession.ExecuteNonQuery();
                         if (row != 0)
                         {
+
+                            // Hediye kullanıldıktan sonra 'used_time' güncelleniyor
+                            SqlCommand updateUsedTime = new SqlCommand("UPDATE gift_wheel SET used_time = ISNULL(used_time, 0) + @UsedTime, is_claimed = 1 WHERE user_id = @UserID", connection);
+                            updateUsedTime.Parameters.AddWithValue("@UsedTime", remainingTime); // Kalan süre kadar kullanılan süreyi ekle
+                            updateUsedTime.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
+                            updateUsedTime.ExecuteNonQuery(); // Güncellemeyi yap
                             MessageBox.Show("Oturum Başarıyla Güncellenmiştir.Bir Daha Bekleriz.");
                         }
                     }
