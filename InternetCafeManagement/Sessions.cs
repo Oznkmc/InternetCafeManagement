@@ -131,35 +131,25 @@ namespace InternetCafeManagement
                     //    return;
                     //}
 
-                    // Eğer hediye 1 veya 3 saat ücretsiz oturumsa
                     if (reward == "1 saat ücretsiz oturum" || reward == "3 saat ücretsiz oturum")
                     {
                         DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                         if (result2 == DialogResult.Yes)
                         {
-                            //int remainingTime = (giftDuration) - usedTime; // Kalan süreyi hesapla
-                            //if (remainingTime <= 0)
-                            //{
-                            //    MessageBox.Show("Hediye süresi tamamlanmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            //    OpenCustomInputSession();
-                            //    return;
-                            //}
                             SqlCommand command = new SqlCommand("select is_claimed from gift_wheel where user_id=@UserID", connection);
                             command.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
                             object resultClaimed = command.ExecuteScalar();
 
-
-                            SqlCommand command1 = new SqlCommand("SELECT ABS((gift_duration * 60) - used_time) FROM gift_wheel WHERE user_id=@UserID;", connection);
+                            SqlCommand command1 = new SqlCommand("SELECT (gift_duration * 60) - used_time FROM gift_wheel WHERE user_id=@UserID;", connection);
                             command1.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
                             object resultcommand1 = command1.ExecuteScalar();
 
                             if (resultcommand1 != null && resultcommand1 != DBNull.Value)
                             {
-                                int absGift = (int)resultcommand1;
-                                if (absGift > 0)
+                                int remainingTime = (int)resultcommand1;  // Bu artık doğrudan kalan süreyi döndürecek
+                                if (remainingTime > 0)
                                 {
-                                    remainingTime = absGift; // Kalan zamanı doğrudan alıyoruz
                                     parsedOturumSuresi = remainingTime; // Kalan süreyi saniye olarak alıyoruz
 
                                     // Kullanıcı oturumu başlat
@@ -175,9 +165,9 @@ namespace InternetCafeManagement
                                     this.Hide();
                                     usersSessionGift.Show();
                                 }
-                                else
+                                else if (remainingTime <= 0)
                                 {
-                                    MessageBox.Show("Hedef Zaten Tamamlanmış.");
+                                    MessageBox.Show("Hediye süresi tamamlanmış.");
                                     OpenCustomInputSession();
                                 }
                             }

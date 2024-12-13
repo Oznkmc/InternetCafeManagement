@@ -18,6 +18,7 @@ namespace InternetCafeManagement
         public UsersSession()
         {
             InitializeComponent();
+           
         }
         public bool user_role { get; set; }
         public string user_mail { get; set; }
@@ -33,14 +34,17 @@ namespace InternetCafeManagement
         public int dakika;
         public int saniye = 0;
         public int saniye2 = 0;
+        public static Timer timer2;
         public bool dakikasifirla { get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
+       
         private void pictureBox2_Click(object sender, EventArgs e)
         {
             Order order = new Order();
             order.secilipc = secili_pc;
             order.user_mail = user_mail;
             order.user_balance = this.user_balance;
+           
             order.Show();
 
         }
@@ -168,7 +172,10 @@ namespace InternetCafeManagement
         private int user_id;
         private void UsersSession_Load(object sender, EventArgs e)
         {
-
+            if(hediyekullandi)
+            {
+                pictureBox5.Visible= false;
+            }
             label1.Text += " " + user_mail;
             label2.Text += " " + secili_pc;
             label5.Text = "Dakika: 0 Saniye:0";
@@ -206,32 +213,47 @@ namespace InternetCafeManagement
         private int computeridtake;
         private void timer1_Tick(object sender, EventArgs e)
         {
-            saniye++;
-            lasttime = oturum_suresi - saniye;
-            label4.Text = "Kalan Süre: " + lasttime.ToString();
-            saniye2++;
+            saniye++;  // Zamanı bir artırıyoruz
+            lasttime = oturum_suresi - saniye;  // Kalan süreyi hesaplıyoruz
+            label4.Text = "Kalan Süre: " + lasttime.ToString() + " saniye";
 
-            if (saniye <= oturum_suresi)
+            if (saniye % 60 == 0)  // Her dakika başında
             {
-                if (hediyekullandi)
-                {
-                    // Hediye kullanılıyorsa sadece zaman işlemleri yapılır.
-                    UpdateUsedGiftTime(1); // Her Tick için 1 saniye eklenir.
-                }
-                else
-                {
-                    // Hediye kullanılmıyorsa oturum ücretlendirmesi yapılır.
-                    UpdateLabels();
-                }
+                dakika++;
+                sessionBalance += 0.25f;  // Dakika başına ücret ekleniyor
+            }
+
+            // 60 dakikada bir saat hesaplanır
+            if (dakika == 60)
+            {
+                saat++;
+                dakika = 0;  // Dakikalar sıfırlanır
+            }
+
+            // Etiketleri günceller
+            label5.Text = $"Saat: {saat} Dakika: {dakika} Saniye: {saniye}";
+            lblSessionCount.Text = $"Oturum Süresi Ücreti: {sessionBalance:0.00} TL";
+
+            // Hediye durumu kontrolü
+            if (hediyekullandi)
+            {
+                // Hediye kullanılıyorsa sadece zaman işlemleri yapılır
+                UpdateUsedGiftTime(1);  // Hediye zamanı 1 saniye artar
             }
             else
             {
-                // Süre dolduğunda oturum sonlandırılır.
-                timer1.Stop();
+                // Hediye kullanılmıyorsa oturum ücretlendirmesi yapılır
+                UpdateLabels();
+            }
+
+            if (saniye >= oturum_suresi)  // Süre bittiğinde
+            {
+                timer1.Stop();  // Zamanlayıcıyı durdur
                 MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor...");
-                FinalizeSession();
+                FinalizeSession();  // Oturumu sonlandır
             }
         }
+
 
         private void UpdateLabels()
         {
@@ -266,7 +288,7 @@ namespace InternetCafeManagement
                         connection);
                     updateGiftTime.Parameters.AddWithValue("@ElapsedSeconds", elapsedSeconds);
                     updateGiftTime.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
-                    updateGiftTime.ExecuteNonQuery();
+                    updateGiftTime.ExecuteNonQuery();  // Sadece 1 saniye güncelleniyor
                 }
             }
             catch (Exception ex)
@@ -604,6 +626,6 @@ namespace InternetCafeManagement
             }
         }
 
-      
+        
     }
 }

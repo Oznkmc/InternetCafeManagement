@@ -32,9 +32,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UsersSession));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -44,6 +41,7 @@
             this.lblSessionCount = new System.Windows.Forms.Label();
             this.lblSiparis = new System.Windows.Forms.Label();
             this.pictureBox5 = new System.Windows.Forms.PictureBox();
+            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
@@ -55,7 +53,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label1.Location = new System.Drawing.Point(310, 14);
+            this.label1.Location = new System.Drawing.Point(316, 93);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(153, 29);
             this.label1.TabIndex = 0;
@@ -65,45 +63,17 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label2.Location = new System.Drawing.Point(310, 63);
+            this.label2.Location = new System.Drawing.Point(316, 147);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(131, 29);
             this.label2.TabIndex = 1;
             this.label2.Text = "Bilgisayar:";
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label3.Location = new System.Drawing.Point(310, 113);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(188, 29);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Oturum Siparişi";
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Location = new System.Drawing.Point(304, 157);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(227, 168);
-            this.richTextBox1.TabIndex = 3;
-            this.richTextBox1.Text = "";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label4.Location = new System.Drawing.Point(299, 342);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(147, 29);
-            this.label4.TabIndex = 4;
-            this.label4.Text = "Geçen Süre";
-            // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label5.Location = new System.Drawing.Point(310, 384);
+            this.label5.Location = new System.Drawing.Point(326, 290);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(64, 25);
             this.label5.TabIndex = 5;
@@ -112,7 +82,7 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(134, 506);
+            this.pictureBox1.Location = new System.Drawing.Point(118, 463);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(115, 75);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -123,7 +93,7 @@
             // pictureBox2
             // 
             this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(348, 506);
+            this.pictureBox2.Location = new System.Drawing.Point(332, 463);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(115, 75);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -163,7 +133,7 @@
             // 
             this.lblSessionCount.AutoSize = true;
             this.lblSessionCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.lblSessionCount.Location = new System.Drawing.Point(299, 409);
+            this.lblSessionCount.Location = new System.Drawing.Point(316, 315);
             this.lblSessionCount.Name = "lblSessionCount";
             this.lblSessionCount.Size = new System.Drawing.Size(254, 29);
             this.lblSessionCount.TabIndex = 12;
@@ -173,7 +143,7 @@
             // 
             this.lblSiparis.AutoSize = true;
             this.lblSiparis.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.lblSiparis.Location = new System.Drawing.Point(299, 452);
+            this.lblSiparis.Location = new System.Drawing.Point(316, 358);
             this.lblSiparis.Name = "lblSiparis";
             this.lblSiparis.Size = new System.Drawing.Size(169, 29);
             this.lblSiparis.TabIndex = 13;
@@ -182,13 +152,23 @@
             // pictureBox5
             // 
             this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
-            this.pictureBox5.Location = new System.Drawing.Point(534, 506);
+            this.pictureBox5.Location = new System.Drawing.Point(518, 463);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(115, 75);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox5.TabIndex = 14;
             this.pictureBox5.TabStop = false;
             this.pictureBox5.Click += new System.EventHandler(this.pictureBox5_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label4.Location = new System.Drawing.Point(316, 248);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(147, 29);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "Geçen Süre";
             // 
             // UsersSession
             // 
@@ -204,8 +184,6 @@
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -227,9 +205,6 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.RichTextBox richTextBox1;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.PictureBox pictureBox2;
@@ -239,5 +214,6 @@
         private System.Windows.Forms.Label lblSessionCount;
         private System.Windows.Forms.Label lblSiparis;
         private System.Windows.Forms.PictureBox pictureBox5;
+        private System.Windows.Forms.Label label4;
     }
 }

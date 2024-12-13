@@ -250,6 +250,12 @@
     <Compile Include="OrderForm.Designer.cs">
       <DependentUpon>OrderForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="OrderInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OrderInfo.Designer.cs">
+      <DependentUpon>OrderInfo.cs</DependentUpon>
+    </Compile>
     <Compile Include="ProductsInfo.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -335,6 +341,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="OrderForm.resx">
       <DependentUpon>OrderForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OrderInfo.resx">
+      <DependentUpon>OrderInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProductsInfo.resx">
       <DependentUpon>ProductsInfo.cs</DependentUpon>

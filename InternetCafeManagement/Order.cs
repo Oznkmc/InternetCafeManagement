@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -228,7 +229,7 @@ namespace InternetCafeManagement
         {
             LoadAnaYemekItemsToListView("İçecek");
         }
-
+      public  ArrayList urunlerArray = new ArrayList();
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
           
@@ -238,7 +239,7 @@ namespace InternetCafeManagement
                     ListViewItem selectedItem = listView1.SelectedItems[0];
                     string itemName = selectedItem.Text; // Ürün adı
                     decimal price = decimal.Parse(selectedItem.SubItems[1].Text, System.Globalization.NumberStyles.Currency); // Fiyat
-
+                    urunlerArray.Add(selectedItem.Text);
                     // Adet TextBox'ından değer al
                     if (int.TryParse(txtCount.Text, out int quantity) && quantity > 0)
                     {
@@ -270,28 +271,33 @@ namespace InternetCafeManagement
                 return;
             }
 
-            // Masa numarasını almak
-            // Masa numarasını kullanıcıdan alıyoruz
-           
-
-            // Masa ID'sini veritabanından almak
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                SqlCommand secilipcCommand = new SqlCommand("select computer_id from computers where name=@secilipc", connection);
+
+                // Seçilen bilgisayarın ID'sini almak için SQL komutunu oluşturuyoruz
+                SqlCommand secilipcCommand = new SqlCommand("SELECT computer_id FROM computers WHERE name = @secilipc", connection);
                 secilipcCommand.Parameters.AddWithValue("@secilipc", secilipc);
-                object result5=secilipcCommand.ExecuteScalar();
-                if(result5!=null)
+                object result5 = secilipcCommand.ExecuteScalar();
+
+                if (result5 != null)
                 {
                     seciliid = (int)result5;
                 }
+                else
+                {
+                    MessageBox.Show("Seçilen bilgisayar bulunamadı!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Seçilen bilgisayarın oturum bilgisini alıyoruz
                 SqlCommand sqlCommand = new SqlCommand("SELECT session_id FROM sessions WHERE computer_id = @ComputerID", connection);
                 sqlCommand.Parameters.AddWithValue("@ComputerID", seciliid);
                 object result = sqlCommand.ExecuteScalar();
 
                 if (result != null)
                 {
-                    sessionidgetir = (int)result; // Veritabanından alınan TableID
+                    sessionidgetir = (int)result;
                 }
                 else
                 {
@@ -300,50 +306,56 @@ namespace InternetCafeManagement
                 }
             }
 
+            // Siparişin toplam fiyatını hesaplıyoruz
             decimal totalPrice = 0;
 
             foreach (ListViewItem item in listView2.Items)
             {
                 int quantity = int.Parse(item.SubItems[1].Text); // Adet
                 decimal price = decimal.Parse(item.SubItems[2].Text, System.Globalization.NumberStyles.Currency); // Birim fiyat
-                 itemTotalPrice = quantity * price; // Adet x Birim Fiyat
-
+                decimal itemTotalPrice = quantity * price; // Adet x Birim Fiyat
                 totalPrice += itemTotalPrice;
             }
-            if(totalPrice>Convert.ToDecimal(user_balance))
+
+            // Kullanıcı bakiyesi kontrolü
+            if (totalPrice > Convert.ToDecimal(user_balance))
             {
-                MessageBox.Show("Hesap Bakiyesi Yetersiz.");
+                MessageBox.Show("Hesap bakiyesi yetersiz.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 listView1.Items.Clear();
                 listView2.Items.Clear();
-                //return;
+                return;
             }
-            else
+
+            // Ödeme tipini soruyoruz
+            DialogResult result6 = MessageBox.Show("Ödeme Tipiniz Nakit Mi?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            string payment_method = result6 == DialogResult.Yes ? "Nakit" : "Banka Kartı";
+
+            // Siparişi veritabanına kaydediyoruz
+            int orderId = SaveOrderToDatabase(sessionidgetir, totalPrice, payment_method);
+
+            // Kullanıcı oturumu için bilgileri hazırlıyoruz
+            UsersSession usersSession = new UsersSession
             {
-                DialogResult result6 = MessageBox.Show("Ödeme Tipiniz Nakit Mi?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (result6 == DialogResult.Yes)
-                {
-                    payment_method = "Nakit";
-                }
-                else
-                {
-                    payment_method = "Banka Kartı";
-                }
-                // Siparişi Orders tablosuna kaydet ve OrderID'yi al
-                int orderId = SaveOrderToDatabase(sessionidgetir, totalPrice, payment_method);
-                UsersSession usersSession = new UsersSession();
-                usersSession.user_balance = Convert.ToDouble(totalPrice);
-                // Ödeme durumu
-              
+                user_balance = Convert.ToDouble(totalPrice),
+                //user_role = this.user_role,
+                user_mail = this.user_mail,
+                
+                secili_pc = this.secilipc, // Seçilen bilgisayar
+                hediyekullandi = true,
+            };
 
+            // Sipariş ekranını temizliyoruz
+            listView1.Items.Clear();
+            listView2.Items.Clear();
 
-
-                // Sipariş ekranını temizle
-
-                MessageBox.Show("Sipariş başarıyla kaydedildi!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                this.Hide();
-            }
+            // Kullanıcıya siparişin başarıyla kaydedildiği mesajını gösteriyoruz
+            MessageBox.Show("Sipariş başarıyla kaydedildi!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            
+            Order order=new Order();
+            order.Hide();
            
+
+
 
         }
     }
