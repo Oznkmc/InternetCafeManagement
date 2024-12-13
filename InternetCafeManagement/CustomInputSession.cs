@@ -62,6 +62,41 @@ namespace InternetCafeManagement
         }
 
         public int oturumSuresi;
+        private int GetUserId(string email)
+        {
+            int userId = 0;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email = @Email", connection);
+                command.Parameters.AddWithValue("@Email", email);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    userId = Convert.ToInt32(reader["user_id"]);
+                }
+            }
+            return userId;
+        }
+
+        private int GetComputerId(string computerName)
+        {
+            int computerId = 0;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand("SELECT computer_id FROM computers WHERE name = @ComputerName", connection);
+                command.Parameters.AddWithValue("@ComputerName", computerName);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    computerId = Convert.ToInt32(reader["computer_id"]);
+                }
+            }
+            return computerId;
+        }
+
+
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
@@ -126,6 +161,33 @@ namespace InternetCafeManagement
                         DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                         if (result == DialogResult.Yes)
                         {
+                            using (SqlConnection connection=new SqlConnection(connectionString))
+                            {
+                                try
+                                {
+                                    connection.Open();
+                                    //Oturum bilgilerini kaydet
+                                    SqlCommand addSession = new SqlCommand( 
+                                        "INSERT INTO sessions (user_id, computer_id, start_time) " +
+                                        "VALUES (@UserId, @ComputerId, @StartTime)", connection);
+                                    addSession.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
+                                    addSession.Parameters.AddWithValue("@ComputerId", GetComputerId(secili_pc));
+
+                                    addSession.Parameters.AddWithValue("@StartTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                                    addSession.ExecuteNonQuery();
+                                }
+                                catch(Exception ex)
+                                {
+                                    MessageBox.Show("Hatanız:" + ex.Message);
+                                }
+                                finally
+                                {
+                                    connection.Close();
+                                }
+                              
+                            }
+                            
                             oturumSuresi = parsedOturumSuresi;
                             UpdateComputerStatus("unavailable");
                             // Oturum başlatma
@@ -197,13 +259,13 @@ namespace InternetCafeManagement
             DialogResult result = MessageBox.Show("Oturum Sayfasına Dönüyorsun. Emin Misin?", "Geri Dön", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
-               Sessions sessions = new Sessions
-               {
-                   user_mail = this.user_mail,
-                   user_balance = this.user_balance,
-                   user_role = this.user_role,
-                   
-               }
+                Sessions sessions = new Sessions
+                {
+                    user_mail = this.user_mail,
+                    user_balance = this.user_balance,
+                    user_role = this.user_role,
+
+                };
                 sessions.Show();
                 this.Hide();
             }

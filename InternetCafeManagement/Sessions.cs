@@ -179,7 +179,6 @@ namespace InternetCafeManagement
                 MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-           
 
 
 

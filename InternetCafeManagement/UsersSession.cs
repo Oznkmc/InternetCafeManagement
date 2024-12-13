@@ -38,7 +38,9 @@ namespace InternetCafeManagement
         private void pictureBox2_Click(object sender, EventArgs e)
         {
             Order order = new Order();
-
+            order.secilipc = secili_pc;
+            order.user_mail = user_mail;
+            order.user_balance = this.user_balance;
             order.Show();
 
         }
@@ -73,15 +75,32 @@ namespace InternetCafeManagement
                     int computerId = computerIdResult != DBNull.Value ? Convert.ToInt32(computerIdResult) : 0;
 
                     // Oturum bilgilerini kaydet
-                    SqlCommand saveSession = new SqlCommand(
-                        "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
-                        "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)", connection);
-                    saveSession.Parameters.AddWithValue("@UserId", userId);
-                    saveSession.Parameters.AddWithValue("@ComputerId", computerId);
-                    saveSession.Parameters.AddWithValue("@TotalPrice", sessionBalance);
-                    saveSession.Parameters.AddWithValue("@StartTime", startTimeString);
-                    saveSession.Parameters.AddWithValue("@EndTime", endTimeString);
-                    saveSession.ExecuteNonQuery();
+                    //SqlCommand saveSession = new SqlCommand(
+                    //    "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
+                    //    "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)", connection);
+                    //saveSession.Parameters.AddWithValue("@UserId", userId);
+                    //saveSession.Parameters.AddWithValue("@ComputerId", computerId);
+                    //saveSession.Parameters.AddWithValue("@TotalPrice", sessionBalance);
+                    //saveSession.Parameters.AddWithValue("@StartTime", startTimeString);
+                    //saveSession.Parameters.AddWithValue("@EndTime", endTimeString);
+                    //saveSession.ExecuteNonQuery();
+
+                    SqlCommand SessionID = new SqlCommand("select session_id from sessions where user_id=@GetUserID  and status=1", connection);
+                    SessionID.Parameters.AddWithValue("@GetUserID", GetUserId(user_mail));
+                    object result7 = SessionID.ExecuteScalar();
+                    if (result7 != null)
+                    {
+                        int SessionIDgetir = (int)result7;
+                        SqlCommand UpdateSession = new SqlCommand("Update sessions set total_price=@TotalPrice,end_time=@EndDate where sessionid=@SessionID", connection);
+                        UpdateSession.Parameters.AddWithValue("@TotalPrice", totalprice);
+                        UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        UpdateSession.Parameters.AddWithValue("@SessionID", SessionIDgetir);
+                        int row = UpdateSession.ExecuteNonQuery();
+                        if (row != 0)
+                        {
+                            MessageBox.Show("Oturum Başarıyla Güncellenmiştir.Bir Daha Bekleriz.");
+                        }
+                    }
 
                     // Kullanıcı bakiyesini güncelle
                     SqlCommand updateBalance = new SqlCommand("UPDATE users SET balance = @UserBalance WHERE email = @UserMail", connection);
@@ -185,132 +204,149 @@ namespace InternetCafeManagement
         public int lasttime;
         int saat = 0;
         private int computeridtake;
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            saniye++;  // Her tikte saniyeyi arttırıyoruz.
-            lasttime = oturum_suresi - saniye;
-            label4.Text = "Kalan Süre:" + lasttime.ToString();
-            saniye2++;
-
-            // Oturum süresi (dakika olarak) dışarıdan alındığı için saniyeye çevrilmiş olmalı.
-            if (saniye <= oturum_suresi) // Oturum süresi saniye cinsinden kontrol ediliyor.
+      
+            private void timer1_Tick(object sender, EventArgs e)
             {
-                user_balance -= sessionBalance;
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                saniye++;
+                lasttime = oturum_suresi - saniye;
+                label4.Text = "Kalan Süre: " + lasttime.ToString();
+                saniye2++;
+
+                if (saniye <= oturum_suresi)
                 {
-                    if (hediyekullandi == false)
+                    if (hediyekullandi)
                     {
-                        connection.Open();
-                        SqlCommand balanceguncelle = new SqlCommand("Update users SET balance=@UserBalance where email=@UserMail", connection);
-                        balanceguncelle.Parameters.AddWithValue("@UserBalance", user_balance);
-                        balanceguncelle.Parameters.AddWithValue("@UserMail", user_mail);
-                        balanceguncelle.ExecuteNonQuery();
-                        connection.Close();
+                        // Hediye kullanılıyorsa, sadece zaman işlemleri yapılacak
+                        UpdateUsedGiftTime(lasttime);
+                       //gift duration ve used_time sorunu var çözmeliyiz
                     }
-
-                    label5.Text = "Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
-
-                    if (saniye % 60 == 0)
+                    else
                     {
-                        dakika++;  // Dakikayı arttır
-                        sessionBalance += (dakika * 0.25f);
-                        lblSessionCount.Text = "Oturum Süresi: " + sessionBalance.ToString();
-                        saniye2 = 0;
-                    }
+                       //user_balance -= sessionBalance;
 
-                    if (dakika == 60)
-                    {
-                        saat++;  // Saati arttır
-                        if (dakikasifirla == true)
-                        {
-                            dakika = 0;  // Dakikayı sıfırla
-                        }
-                        saniye2 = 0;
-                        label5.Text = "Saat: " + saat.ToString() + " Dakika: " + dakika.ToString() + " Saniye: " + saniye2.ToString();
-                    }
+                    UpdateLabels();
+                }
+
+                  
+                }
+                else
+                {
+                    timer1.Stop();
+                    MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor...");
+                    FinalizeSession();
                 }
             }
-            else
+
+        private void UpdateLabels()
+        {
+            // Dakika ve saniye hesaplamalarını güncelle
+            if (saniye % 60 == 0)
             {
-                // Oturum süresi bitmişse işlemi sonlandır
-                timer1.Stop();
-                MessageBox.Show("Oturum Süreniz Tükenmiştir. Ana Sayfaya aktarılıyorsunuz...");
+                dakika++;
+                sessionBalance += (dakika * 0.25f); // Oturum süresi ücretlendirme mantığı
+                saniye2 = 0;
+            }
 
-                try
-                {
-                    string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
-                    string endTimeString = end_time.ToString("yyyy-MM-dd HH:mm:ss");
+            if (dakika == 60)
+            {
+                saat++;
+                dakika = 0; // Dakika sıfırlanır
+            }
 
-                    using (SqlConnection connection = new SqlConnection(connectionString))
-                    {
-                        connection.Open();
+            // Etiketleri güncelle
+            label5.Text = $"Saat: {saat} Dakika: {dakika} Saniye: {saniye2}";
+            lblSessionCount.Text = $"Oturum Süresi Ücreti: {sessionBalance:0.00} TL";
+        }
 
-                        // Kullanıcının ödülünü güncelle (hediye hakkı bittiyse)
-                        if (hediyekullandi == false)
-                        {
-                            SqlCommand giftUpdate = new SqlCommand(
-                                "UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserId AND is_claimed = 0", connection);
-                            giftUpdate.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
-                            giftUpdate.ExecuteNonQuery();
-                        }
-
-                        // Kullanıcı bakiyesini güncelle
-                        if (hediyekullandi == false)
-                        {
-                            SqlCommand balanceupdate = new SqlCommand("UPDATE users SET balance=balance-@SessionBalance WHERE email=@SessionMail", connection);
-                            balanceupdate.Parameters.AddWithValue("@SessionBalance", sessionBalance);
-                            balanceupdate.Parameters.AddWithValue("@SessionMail", user_mail);
-                            balanceupdate.ExecuteNonQuery();
-                        }
-
-                        // Bilgisayarın durumunu 'available' olarak güncelle
-                        SqlCommand command = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @secilipc", connection);
-                        command.Parameters.AddWithValue("@secilipc", secili_pc);
-                        int rowsAffected = command.ExecuteNonQuery();
-
-                        // Oturum bilgilerini kaydet
-                        SqlCommand addSessions = new SqlCommand(
-                            "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
-                            "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)", connection);
-                        addSessions.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
-                        SqlCommand computerid = new SqlCommand("select computer_id from computers where name=@ComputerName", connection);
-                        computerid.Parameters.AddWithValue("@ComputerName", secili_pc);
-                        object ComputerResult = computerid.ExecuteScalar();
-                        if (ComputerResult != null)
-                        {
-                            computeridtake = (int)ComputerResult;
-                        }
-                        addSessions.Parameters.AddWithValue("@ComputerId", computeridtake);
-                        addSessions.Parameters.AddWithValue("@TotalPrice", sessionBalance);
-                        addSessions.Parameters.AddWithValue("@StartTime", startTimeString);
-                        addSessions.Parameters.AddWithValue("@EndTime", endTimeString);
-
-                        addSessions.ExecuteNonQuery();
-
-                        MessageBox.Show("Oturum Süresi: " + dakika.ToString() + "\n Seçili Bilgisayar: " + secili_pc + "\n Toplam Tutar: " + sessionBalance.ToString());
-
-                        if (rowsAffected < 0)
-                        {
-                            MessageBox.Show("Bilgisayar bulunamadı veya durum zaten güncel.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        }
-                    }
-
-                    // Ana sayfaya geçiş
-                    AnaSayfa anaSayfa = new AnaSayfa
-                    {
-                        user_role = user_role,
-                        user_balance = user_balance,
-                        user_mail = user_mail,
-                    };
-                    anaSayfa.Show();
-                    this.Hide();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+        private void UpdateUsedGiftTime(int elapsedSeconds)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                SqlCommand updateGiftTime = new SqlCommand(
+                    "UPDATE gift_wheel SET used_time = used_time + @ElapsedSeconds WHERE user_id = @UserId AND is_claimed = 0",
+                    connection);
+                updateGiftTime.Parameters.AddWithValue("@ElapsedSeconds", elapsedSeconds);
+                updateGiftTime.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
+                updateGiftTime.ExecuteNonQuery();
             }
         }
+
+        private void FinalizeSession()
+        {
+            try
+            {
+                string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
+                string endTimeString = end_time.ToString("yyyy-MM-dd HH:mm:ss");
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // Hediye durumu kontrolü
+                    if (!hediyekullandi)
+                    {
+                        SqlCommand markGiftClaimed = new SqlCommand(
+                            "UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserId AND is_claimed = 0", connection);
+                        markGiftClaimed.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
+                        markGiftClaimed.ExecuteNonQuery();
+                    }
+
+                    // Bilgisayar durumunu güncelle
+                    SqlCommand updateComputerStatus = new SqlCommand(
+                        "UPDATE computers SET status = 'available' WHERE name = @ComputerName",
+                        connection);
+                    updateComputerStatus.Parameters.AddWithValue("@ComputerName", secili_pc);
+                    updateComputerStatus.ExecuteNonQuery();
+
+
+                    SqlCommand SessionID = new SqlCommand("select session_id from sessions where user_id=@GetUserID  and status=1", connection);
+                    SessionID.Parameters.AddWithValue("@GetUserID", GetUserId(user_mail));
+                    object result7 = SessionID.ExecuteScalar();
+                    if (result7 != null)
+                    {
+                        int SessionIDgetir = (int)result7;
+                        SqlCommand UpdateSession = new SqlCommand("Update sessions set total_price=@TotalPrice,end_time=@EndDate,status=0 where session_id=@SessionID", connection);
+                        UpdateSession.Parameters.AddWithValue("@TotalPrice", totalprice); // Doğru `totalprice` değerini burada kullan
+                        UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        UpdateSession.Parameters.AddWithValue("@SessionID", SessionIDgetir);
+                        int row = UpdateSession.ExecuteNonQuery();
+                        if (row != 0)
+                        {
+                            MessageBox.Show("Oturum Başarıyla Güncellenmiştir.Bir Daha Bekleriz.");
+                        }
+                    }
+
+                }
+
+                //// Kullanıcıya seçenek sun
+                //DialogResult result = MessageBox.Show(
+                //    "Hediye süreniz dolmuştur. Oturum açmak ister misiniz?",
+                //    "Süre Doldu",
+                //    MessageBoxButtons.YesNo);
+
+                //if (result == DialogResult.Yes)
+                //{
+                //    CustomInputSession customSession = new CustomInputSession
+                //    {
+                //        user_mail = user_mail,
+                //        user_role = user_role
+                //    };
+                //    customSession.Show();
+                //    this.Hide();
+                //}
+                //else
+                //{
+                //    Application.Exit();
+                //}
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Bir hata oluştu: " + ex.Message);
+            }
+        }
+
+
 
         private int GetUserId(string email)
         {
@@ -335,12 +371,12 @@ namespace InternetCafeManagement
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                SqlCommand command = new SqlCommand("SELECT id FROM computers WHERE name = @ComputerName", connection);
+                SqlCommand command = new SqlCommand("SELECT computer_id FROM computers WHERE name = @ComputerName", connection);
                 command.Parameters.AddWithValue("@ComputerName", computerName);
                 SqlDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    computerId = Convert.ToInt32(reader["id"]);
+                    computerId = Convert.ToInt32(reader["computer_id"]);
                 }
             }
             return computerId;
@@ -365,75 +401,186 @@ namespace InternetCafeManagement
             add.Show();
             this.Hide();
         }
-
+        public decimal totalprice;
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Oturumu kapatmak istediğinizden emin misiniz?", "Oturumu Kapat", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            //try
+            //{
+            //    // Oturum süresi dolmadan kapatma kontrolü
+            //    if (timer1.Enabled)
+            //    {
+            //        timer1.Stop(); // Zamanlayıcıyı durdur
+            //    }
 
-            if (result == DialogResult.Yes)
+            //    // FinalizeSession metodu ile oturum işlemlerini tamamla
+            //    FinalizeSession();
+
+            //    MessageBox.Show("Oturum başarıyla kapatıldı.", "Oturum Kapatıldı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            //    // Gerekirse başka işlemler yap
+            //    // Örneğin, kullanıcıyı ana ekrana yönlendirme
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show("Oturum kapatılırken bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
+            int usedTime = saniye; // Kullanılan süre (saniye cinsinden)
+            int remainingTime = 0; // Kalan süre
+            int giftDuration = 0;
+            int previouslyUsedTime = 0;
+            bool isGiftClaimed = false;
+
+            try
             {
-                timer1.Stop();
-
-                try
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
-                    string endTimeString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    connection.Open();
 
-                    using (SqlConnection connection = new SqlConnection(connectionString))
+                    // Kullanıcının hediye bilgilerini al
+                    SqlCommand giftQuery = new SqlCommand(
+                        "SELECT gift_duration, used_time, is_claimed FROM gift_wheel WHERE user_id = @UserID AND is_claimed = 0", connection);
+                    giftQuery.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
+
+                    SqlDataReader reader = giftQuery.ExecuteReader();
+                    if (reader.Read())
                     {
-                        connection.Open();
+                        giftDuration = reader["gift_duration"] != DBNull.Value ? Convert.ToInt32(reader["gift_duration"]) : 0;
+                        previouslyUsedTime = reader["used_time"] != DBNull.Value ? Convert.ToInt32(reader["used_time"]) : 0;
+                        isGiftClaimed = reader["is_claimed"] != DBNull.Value ? Convert.ToBoolean(reader["is_claimed"]) : false;
+                        reader.Close();
 
-                        // Bilgisayar durumunu güncelle
-                        SqlCommand updateComputerStatus = new SqlCommand("UPDATE computers SET status = 'available' WHERE name = @SelectedPC", connection);
-                        updateComputerStatus.Parameters.AddWithValue("@SelectedPC", secili_pc);
-                        updateComputerStatus.ExecuteNonQuery();
+                        // Eğer hediye kullanıldıysa balance işlemi yapılacak, hediye süresi geçerli değil
+                        if (isGiftClaimed)
+                        {
+                            MessageBox.Show("Hediyeniz zaten kullanıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            // Kalan süreyi hesaplayalım
+                            int remainingGiftTime = giftDuration - previouslyUsedTime; // Kalan süre (hediye süresi - kullanılan süre)
 
-                        // Kullanıcı ID'sini al
-                        SqlCommand userIdCommand = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
-                        userIdCommand.Parameters.AddWithValue("@UserMail", user_mail);
-                        object userIdResult = userIdCommand.ExecuteScalar();
-                        int userId = userIdResult != DBNull.Value ? Convert.ToInt32(userIdResult) : 0;
+                            if (remainingGiftTime > 0)
+                            {
+                                // Hediye süresi hala geçerli ve kullanılabilir durumda
+                                int newUsedTime = previouslyUsedTime + (usedTime / 60); // Kullanılan süreyi dakikaya çevirerek ekliyoruz
 
-                        // Bilgisayar ID'sini al
-                        SqlCommand computerIdCommand = new SqlCommand("SELECT computer_id FROM computers WHERE name = @SelectedPC", connection);
-                        computerIdCommand.Parameters.AddWithValue("@SelectedPC", secili_pc);
-                        object computerIdResult = computerIdCommand.ExecuteScalar();
-                        int computerId = computerIdResult != DBNull.Value ? Convert.ToInt32(computerIdResult) : 0;
+                                if (newUsedTime <= giftDuration)
+                                {
+                                    // Güncellenmiş used_time'ı kaydediyoruz
+                                    SqlCommand updateGift = new SqlCommand(
+                                        "UPDATE gift_wheel SET used_time = @UsedTime WHERE user_id = @UserID AND is_claimed = 0", connection);
+                                    updateGift.Parameters.AddWithValue("@UsedTime", newUsedTime); // Yeni used_time değerini güncelle
+                                    updateGift.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
+                                    updateGift.ExecuteNonQuery();
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Hediye süreniz tamamlanmıştır.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                            }
+                            else
+                            {
+                                // Hediye süresi bitmişse, 'is_claimed' durumunu güncelle
+                                SqlCommand claimGift = new SqlCommand(
+                                    "UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserID", connection);
+                                claimGift.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
+                                claimGift.ExecuteNonQuery();
 
-                        // Oturum bilgilerini kaydet
-                        SqlCommand saveSession = new SqlCommand(
-                            "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
-                            "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)", connection);
-                        saveSession.Parameters.AddWithValue("@UserId", userId);
-                        saveSession.Parameters.AddWithValue("@ComputerId", computerId);
-                        saveSession.Parameters.AddWithValue("@TotalPrice", sessionBalance);
-                        saveSession.Parameters.AddWithValue("@StartTime", startTimeString);
-                        saveSession.Parameters.AddWithValue("@EndTime", endTimeString);
-                        saveSession.ExecuteNonQuery();
+                                MessageBox.Show("Hediye süreniz tamamlanmıştır. Yeni bir oturum açabilirsiniz.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        reader.Close();
+                        // Eğer hediye yoksa, balance güncellenecek
 
-                        // Kullanıcı bakiyesini güncelle
-                        SqlCommand updateBalance = new SqlCommand("UPDATE users SET balance = @UserBalance WHERE email = @UserMail", connection);
-                        updateBalance.Parameters.AddWithValue("@UserBalance", user_balance);
-                        updateBalance.Parameters.AddWithValue("@UserMail", user_mail);
-                        updateBalance.ExecuteNonQuery();
+                        SqlCommand OrderPrice = new SqlCommand(
+     "SELECT TOP 1 o.TotalAmount AS TotalAmount " +
+     "FROM Orders o " +
+     "INNER JOIN sessions s ON o.SessionID = s.session_id " +
+     "INNER JOIN users u ON o.CustomerID = u.user_id " +
+     "WHERE u.user_id = @UserID " +
+     "AND s.session_id = @session_id " +
+     "AND s.start_time = (SELECT MAX(start_time) FROM sessions WHERE session_id = o.SessionID) " +
+     "ORDER BY s.start_time DESC;",
+     connection
+ );
+                        SqlCommand sessionidgetir = new SqlCommand("select session_id from sessions where status=1 and computer_id=@ComputerID", connection);
+                        sessionidgetir.Parameters.AddWithValue("@ComputerID", GetComputerId(secili_pc));
+                        object resultSessionID= sessionidgetir.ExecuteScalar();
+                        if (resultSessionID != null)
+                        {
+                            int sessionid1 = (int)resultSessionID;
+                            OrderPrice.Parameters.AddWithValue("@session_id", sessionid1);
+                        }
+                        OrderPrice.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
+                        object result8 = OrderPrice.ExecuteScalar();
+                        if (result8 != null)
+                        {
+                            decimal totalamountgetir=(decimal)result8;
 
-                        MessageBox.Show("Oturum başarıyla kapatıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            SqlCommand balanceUpdate = new SqlCommand("UPDATE users SET balance = balance - @SessionBalance WHERE email = @UserMail", connection);
+
+                            balanceUpdate.Parameters.AddWithValue("@SessionBalance", Convert.ToDecimal(sessionBalance)+totalamountgetir); // Kalan süreyi dakika cinsinden balance'dan düş
+
+                            balanceUpdate.Parameters.AddWithValue("@UserMail", user_mail);
+                            balanceUpdate.ExecuteNonQuery();
+                            
+                            MessageBox.Show("Oturum başarıyla kapatıldı. Kullanılabilir süreniz bitti, balance güncellendi.", "Oturum Kapatıldı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
                     }
 
-                    // Ana sayfaya dön
-                    AnaSayfa anaSayfa = new AnaSayfa
+                    
+
+                    SqlCommand SessionID = new SqlCommand("select session_id from sessions where user_id=@GetUserID  and status=1", connection);
+                    SessionID.Parameters.AddWithValue("@GetUserID", GetUserId(user_mail));
+                    object result7 = SessionID.ExecuteScalar();
+                    if (result7 != null)
                     {
-                        user_role = user_role,
-                        user_balance = user_balance,
-                        user_mail = user_mail,
-                    };
-                    anaSayfa.Show();
-                    this.Hide();
+                        int SessionIDgetir=(int) result7;
+                        SqlCommand UpdateSession = new SqlCommand("Update sessions set total_price=@TotalPrice,end_time=@EndDate, status=0 where session_id=@SessionID", connection);
+                        UpdateSession.Parameters.AddWithValue("@TotalPrice", Convert.ToDecimal(totalprice));
+                        UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        UpdateSession.Parameters.AddWithValue("@SessionID", SessionIDgetir);
+                        int row=UpdateSession.ExecuteNonQuery();
+                        if (row != 0)
+                        {
+                            MessageBox.Show("Oturum Başarıyla Güncellenmiştir.Bir Daha Bekleriz.");
+                        }
+                    }
+
+                   
+
+
+
+
+
+
+
+
+
+
+                    // Bilgisayar durumunu güncelle
+                    SqlCommand updateComputerStatus = new SqlCommand(
+                        "UPDATE computers SET status = 'available' WHERE name = @ComputerName", connection);
+                    updateComputerStatus.Parameters.AddWithValue("@ComputerName", secili_pc);
+                    updateComputerStatus.ExecuteNonQuery();
                 }
-                catch (Exception ex)
+
+                // Oturum kapatma işlemi tamamlandıktan sonra ana menüye dön
+                Sessions sessionsForm = new Sessions
                 {
-                    MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                    user_role = this.user_role,
+                    user_mail = this.user_mail,
+                    user_balance = this.user_balance,
+                };
+                sessionsForm.Show();
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -441,10 +588,28 @@ namespace InternetCafeManagement
         {
             DialogResult result = MessageBox.Show("Anasayfaya Döneceksin.Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            if (result == DialogResult.Yes)
+            try
             {
-                OturumuKapat(false); // Uygulamayı kapat seçeneği ile oturumu kapat
+                // Oturum süresi dolmadan kapatma kontrolü
+                if (timer1.Enabled)
+                {
+                    timer1.Stop(); // Zamanlayıcıyı durdur
+                }
+
+                // FinalizeSession metodu ile oturum işlemlerini tamamla
+                FinalizeSession();
+
+                MessageBox.Show("Oturum başarıyla kapatıldı.", "Oturum Kapatıldı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Gerekirse başka işlemler yap
+                // Örneğin, kullanıcıyı ana ekrana yönlendirme
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Oturum kapatılırken bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+      
     }
 }
