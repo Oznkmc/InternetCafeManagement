@@ -42,6 +42,7 @@ namespace InternetCafeManagement
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             MailGir mailGir = new MailGir();
+            mailGir.user_mail = txtMail.Text;
             mailGir.Show();
             this.Hide();
         }
