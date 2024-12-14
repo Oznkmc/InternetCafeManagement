@@ -22,6 +22,7 @@ namespace InternetCafeManagement
         public string user_mail { get; set; }
         public double user_balance { get; set; }
         public string secili_pc { get; set; }
+        public bool hediyekullandi { get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
         int userID;
         //object giftResult;
@@ -121,7 +122,9 @@ namespace InternetCafeManagement
                             user_role = this.user_role,
                             user_mail = this.user_mail,
                             user_balance = this.user_balance,
-                            secili_pc = this.secili_pc
+                            secili_pc = this.secili_pc,
+                            hediyekullandi=false
+                            
                         };
                         usersSession.Show();
                         this.Hide();

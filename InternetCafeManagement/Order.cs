@@ -94,44 +94,34 @@ namespace InternetCafeManagement
             return orderId;
         }
 
-        //private void SaveOrderDetailsToDatabase(int orderId, System.Windows.Forms.ListView listViewOrders)
-        //{
-        //    using (SqlConnection connection = new SqlConnection(connectionString))
-        //    {
-        //        connection.Open();
+        private int SaveOrderToDatabaseInActiveUsersSession(decimal totalPrice, string payment_method)
+        {
+            int orderId = 0;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = @"
+        INSERT INTO Orders (CustomerID, OrderDate, TotalAmount, PaymentMethod)
+        VALUES (@CustomerID, @OrderDate, @TotalPrice, @PaymentMethod);
+        SELECT SCOPE_IDENTITY();"; // Yeni siparişin ID'sini alıyoruz
 
-        //        foreach (ListViewItem item in listViewOrders.Items)
-        //        {
-        //            // Ürün bilgilerini ListView'den al
-        //            string menuItemName = item.Text; // Ürün adı
-        //            int quantity = int.Parse(item.SubItems[1].Text); // Adet
-        //            decimal price = decimal.Parse(item.SubItems[2].Text, System.Globalization.NumberStyles.Currency); // Birim fiyat
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    // Parametreleri ekleyin
+                    command.Parameters.AddWithValue("@OrderDate", DateTime.Now);         // Siparişin tarihini ekliyoruz
+                    command.Parameters.AddWithValue("@TotalPrice", totalPrice);         // Toplam tutar
+                    command.Parameters.AddWithValue("@PaymentMethod", payment_method);  // Ödeme şekli
+                    command.Parameters.AddWithValue("@CustomerID", GetUserId(user_mail)); // Kullanıcı ID'si
 
-        //            // MenuItemID'yi bulmak için bir sorgu yap
-        //            string getMenuItemIdQuery = "SELECT MenuItemID FROM MenuItems WHERE Name = @Name";
-        //            int menuItemId;
-        //            using (SqlCommand getMenuItemCommand = new SqlCommand(getMenuItemIdQuery, connection))
-        //            {
-        //                getMenuItemCommand.Parameters.AddWithValue("@Name", menuItemName);
-        //                menuItemId = Convert.ToInt32(getMenuItemCommand.ExecuteScalar());
-        //            }
+                    // OrderID'yi almak
+                    orderId = Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+            return orderId;
+        }
 
-        //            // OrderDetails tablosuna veri ekle
-        //            string insertDetailsQuery = @"
-        //        INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity, Price) 
-        //        VALUES (@OrderID, @MenuItemID, @Quantity, @Price)";
+        
 
-        //            using (SqlCommand insertCommand = new SqlCommand(insertDetailsQuery, connection))
-        //            {
-        //                insertCommand.Parameters.AddWithValue("@OrderID", orderId);
-        //                insertCommand.Parameters.AddWithValue("@MenuItemID", menuItemId);
-        //                insertCommand.Parameters.AddWithValue("@Quantity", quantity);
-        //                insertCommand.Parameters.AddWithValue("@Price", price * quantity); // Toplam fiyat
-        //                insertCommand.ExecuteNonQuery();
-        //            }
-        //        }
-        //    }
-        //}
         private void LoadAnaYemekItemsToListView(string Category)
         {
 
@@ -224,7 +214,7 @@ namespace InternetCafeManagement
         {
             LoadAnaYemekItemsToListView("Yemek");
         }
-
+        private decimal totalprice;
         private void pictureBox2_Click(object sender, EventArgs e)
         {
             LoadAnaYemekItemsToListView("İçecek");
@@ -243,7 +233,7 @@ namespace InternetCafeManagement
                     // Adet TextBox'ından değer al
                     if (int.TryParse(txtCount.Text, out int quantity) && quantity > 0)
                     {
-                       decimal totalprice = price * quantity;
+                        totalprice = price * quantity;
 
                         // Sipariş ListView'ine ekle
                         ListViewItem orderItem = new ListViewItem(itemName); // Ürün adı
@@ -263,6 +253,45 @@ namespace InternetCafeManagement
         private int sessionidgetir;
         string payment_method;
         decimal itemTotalPrice;
+        public bool UsersSessionActive {  get; set; }
+        public void UpdateUserBalance()
+        {
+            using (SqlConnection connection=new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                        SqlCommand updateBalance = new SqlCommand("Update users SET balance=balance-@TotalPrice where email=@userMail", connection);
+                    updateBalance.Parameters.AddWithValue("@userMail", user_mail);
+                    updateBalance.Parameters.AddWithValue("@TotalPrice", Convert.ToDouble(totalprice));
+                    int row = updateBalance.ExecuteNonQuery();
+                    if (row != 0)
+                    {
+                        SqlCommand command1 = new SqlCommand("select balance from users where email=@UserMail", connection);
+                        command1.Parameters.AddWithValue("@UserMail", user_mail);
+                        object result = command1.ExecuteScalar();
+                        if (result != null)
+                        {
+                            double balance = (double)result;
+                            MessageBox.Show("Bakiyeniz Güncellendi. Yeni Bakiyeniz:" + balance);
+                        }
+                    }
+
+                }
+                catch(Exception ex) 
+                {
+                    MessageBox.Show("Hata Nedeni:" + ex.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+
+                //}
+
+            }
+        }
         private void button12_Click(object sender, EventArgs e)
         {
             if (listView1.Items.Count == 0)
@@ -274,35 +303,39 @@ namespace InternetCafeManagement
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-
-                // Seçilen bilgisayarın ID'sini almak için SQL komutunu oluşturuyoruz
-                SqlCommand secilipcCommand = new SqlCommand("SELECT computer_id FROM computers WHERE name = @secilipc", connection);
-                secilipcCommand.Parameters.AddWithValue("@secilipc", secilipc);
-                object result5 = secilipcCommand.ExecuteScalar();
-
-                if (result5 != null)
+                if (UsersSessionActive == true)
                 {
-                    seciliid = (int)result5;
-                }
-                else
-                {
-                    MessageBox.Show("Seçilen bilgisayar bulunamadı!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                    // Seçilen bilgisayarın ID'sini almak için SQL komutunu oluşturuyoruz
+                    SqlCommand secilipcCommand = new SqlCommand("SELECT computer_id FROM computers WHERE name = @secilipc", connection);
+                    secilipcCommand.Parameters.AddWithValue("@secilipc", secilipc);
+                    object result5 = secilipcCommand.ExecuteScalar();
 
-                // Seçilen bilgisayarın oturum bilgisini alıyoruz
-                SqlCommand sqlCommand = new SqlCommand("SELECT session_id FROM sessions WHERE computer_id = @ComputerID", connection);
-                sqlCommand.Parameters.AddWithValue("@ComputerID", seciliid);
-                object result = sqlCommand.ExecuteScalar();
+                    if (result5 != null)
+                    {
+                        seciliid = (int)result5;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Seçilen bilgisayar bulunamadı!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
 
-                if (result != null)
-                {
-                    sessionidgetir = (int)result;
-                }
-                else
-                {
-                    MessageBox.Show("Seçilen oturum mevcut değil!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+
+
+                    // Seçilen bilgisayarın oturum bilgisini alıyoruz
+                    SqlCommand sqlCommand = new SqlCommand("SELECT session_id FROM sessions WHERE computer_id = @ComputerID", connection);
+                    sqlCommand.Parameters.AddWithValue("@ComputerID", seciliid);
+                    object result = sqlCommand.ExecuteScalar();
+
+                    if (result != null)
+                    {
+                        sessionidgetir = (int)result;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Seçilen oturum mevcut değil!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
                 }
             }
 
@@ -329,9 +362,18 @@ namespace InternetCafeManagement
             // Ödeme tipini soruyoruz
             DialogResult result6 = MessageBox.Show("Ödeme Tipiniz Nakit Mi?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             string payment_method = result6 == DialogResult.Yes ? "Nakit" : "Banka Kartı";
-
+            int orderId;
             // Siparişi veritabanına kaydediyoruz
-            int orderId = SaveOrderToDatabase(sessionidgetir, totalPrice, payment_method);
+            if (UsersSessionActive)
+            {
+               orderId = SaveOrderToDatabase(sessionidgetir, totalPrice, payment_method);
+                UpdateUserBalance();
+            }
+            else
+            {
+                orderId = SaveOrderToDatabaseInActiveUsersSession(totalPrice, payment_method);
+                UpdateUserBalance();
+            }
 
             // Kullanıcı oturumu için bilgileri hazırlıyoruz
             UsersSession usersSession = new UsersSession
@@ -356,6 +398,11 @@ namespace InternetCafeManagement
            
 
 
+
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
 
         }
     }

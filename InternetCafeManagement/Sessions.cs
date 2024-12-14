@@ -180,6 +180,22 @@ namespace InternetCafeManagement
 
                         }
                     }
+                    else
+                    {
+
+                        CustomInputSession customInputSession = new CustomInputSession
+                        {
+                            user_role = this.user_role,
+                            user_mail = this.user_mail,
+                            user_balance = this.user_balance,
+                            secili_pc = lblPC1.Text,
+                            hediyekullandi=false
+                        };
+
+                        customInputSession.Show();
+                        this.Hide();
+
+                    }
                 }
             }
             catch (Exception ex)

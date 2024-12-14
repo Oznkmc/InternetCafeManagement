@@ -16,7 +16,7 @@ namespace InternetCafeManagement
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new OrderInfo());
+            Application.Run(new ÜyeGirisPaneli());
         }
     }
 }

@@ -37,14 +37,14 @@ namespace InternetCafeManagement
         public static Timer timer2;
         public bool dakikasifirla { get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
-       
+        
         private void pictureBox2_Click(object sender, EventArgs e)
         {
             Order order = new Order();
             order.secilipc = secili_pc;
             order.user_mail = user_mail;
             order.user_balance = this.user_balance;
-           
+            order.UsersSessionActive = true;
             order.Show();
 
         }
@@ -179,7 +179,7 @@ namespace InternetCafeManagement
             label1.Text += " " + user_mail;
             label2.Text += " " + secili_pc;
             label5.Text = "Dakika: 0 Saniye:0";
-            lblSessionCount.Text += sessionBalance;
+            //lblSessionCount.Text += sessionBalance;
             // Kullanıcının kalan gift_duration'ını al
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -198,7 +198,7 @@ namespace InternetCafeManagement
                 double giftDuration = giftDurationResult != DBNull.Value ? Convert.ToDouble(giftDurationResult) : 0;
 
                 // Kalan süreyi hesapla
-                label4.Text = "Kalan Hediye Süresi: " + giftDuration.ToString() + " dakika"; // Burada kalan süreyi ekrana yazdırabilirsiniz
+                label4.Text = "Kalan Süresi: " + giftDuration.ToString() + " dakika"; // Burada kalan süreyi ekrana yazdırabilirsiniz
             }
 
 
@@ -217,20 +217,26 @@ namespace InternetCafeManagement
             lasttime = oturum_suresi - saniye;  // Kalan süreyi hesaplıyoruz
             label4.Text = "Kalan Süre: " + lasttime.ToString() + " saniye";
 
-            if (saniye % 60 == 0)  // Her dakika başında
+            if (saniye >= 60)  // Her 60 saniyede
             {
-                dakika++;
-                sessionBalance += 0.25f;  // Dakika başına ücret ekleniyor
+                saniye = 0; // Saniye sıfırlanır
+                dakika++;  // Dakika bir artırılır
+
+                // Dakika başına ücretlendirme yapılır, ancak hediye kullanılmıyorsa
+                if (!hediyekullandi)
+                {
+                    sessionBalance += 0.25f;
+                    UpdateUserBalance(0.25f);  // Bakiyeyi günceller
+                }
             }
 
-            // 60 dakikada bir saat hesaplanır
-            if (dakika == 60)
+            if (dakika >= 60)  // Her 60 dakikada
             {
                 saat++;
-                dakika = 0;  // Dakikalar sıfırlanır
+                dakika = 0; // Dakikalar sıfırlanır
             }
 
-            // Etiketleri günceller
+            // Etiketleri güncelle
             label5.Text = $"Saat: {saat} Dakika: {dakika} Saniye: {saniye}";
             lblSessionCount.Text = $"Oturum Süresi Ücreti: {sessionBalance:0.00} TL";
 
@@ -238,19 +244,65 @@ namespace InternetCafeManagement
             if (hediyekullandi)
             {
                 // Hediye kullanılıyorsa sadece zaman işlemleri yapılır
-                UpdateUsedGiftTime(1);  // Hediye zamanı 1 saniye artar
-            }
-            else
-            {
-                // Hediye kullanılmıyorsa oturum ücretlendirmesi yapılır
-                UpdateLabels();
+                UpdateUsedGiftTime(1);  // Hediye zamanı 1 saniye artırılır
             }
 
-            if (saniye >= oturum_suresi)  // Süre bittiğinde
+            // Süre bittiğinde oturumu sonlandır
+            if (saniye + (dakika * 60) + (saat * 3600) >= oturum_suresi)
             {
                 timer1.Stop();  // Zamanlayıcıyı durdur
-                MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor...");
+                DialogResult resultAna = MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor... Ana Sayfaya Yönlendirilmek İster Misin??", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question); 
+                if(resultAna==DialogResult.Yes)
+                {
+                    AnaSayfa ana = new AnaSayfa
+                    {
+                        user_mail = user_mail,
+                        user_balance = user_balance,
+                        user_role = user_role
+
+                    };
+                    ana.Show();
+                    this.Hide();
+                }
+                else
+                {
+                    Application.Exit();
+                }
                 FinalizeSession();  // Oturumu sonlandır
+            }
+        }
+
+        private void UpdateUserBalance(float deduction)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Kullanıcının mevcut bakiyesini alın
+                SqlCommand balanceCommand = new SqlCommand("SELECT balance FROM users WHERE user_id = @UserId", connection);
+                balanceCommand.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
+                object balanceResult = balanceCommand.ExecuteScalar();
+                float currentBalance = balanceResult != DBNull.Value ? Convert.ToSingle(balanceResult) : 0;
+
+                // Yeni bakiyeyi hesaplayın
+                float newBalance = currentBalance - deduction;
+
+                // Negatif bakiyeyi önleyin
+                if (newBalance < 0)
+                {
+                    MessageBox.Show("Yetersiz bakiye. Oturum devam edemiyor.");
+                    timer1.Stop();
+                    return;
+                }
+
+                // Yeni bakiyeyi güncelleyin
+                SqlCommand updateCommand = new SqlCommand("UPDATE users SET balance = @NewBalance WHERE user_id = @UserId", connection);
+                updateCommand.Parameters.AddWithValue("@NewBalance", newBalance);
+                updateCommand.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
+                updateCommand.ExecuteNonQuery();
+
+                // Kullanıcıya yeni bakiyeyi gösterin
+                lblSessionCount.Text += $"Kalan Bakiye: {newBalance:0.00} TL";
             }
         }
 
@@ -258,21 +310,10 @@ namespace InternetCafeManagement
         private void UpdateLabels()
         {
             // Dakika ve saniye hesaplamalarını güncelle
-            if (saniye % 60 == 0)
-            {
-                dakika++;
-                sessionBalance += (dakika * 0.25f); // Dakika başına ücretlendirme
-                saniye2 = 0; // Ekran için saniye sıfırlanır
-            }
-
-            if (dakika == 60)
-            {
-                saat++;
-                dakika = 0; // Saat tamamlanırsa dakika sıfırlanır
-            }
+            sessionBalance += 0.25f; // Dakika başına ücretlendirme
 
             // Etiketleri güncelle
-            label5.Text = $"Saat: {saat} Dakika: {dakika} Saniye: {saniye2}";
+            label5.Text = $"Saat: {saat} Dakika: {dakika} Saniye: {saniye}";
             lblSessionCount.Text = $"Oturum Süresi Ücreti: {sessionBalance:0.00} TL";
         }
 
@@ -343,6 +384,7 @@ namespace InternetCafeManagement
                             MessageBox.Show("Oturum başarıyla güncellenmiştir. Bir daha bekleriz.");
                         }
                     }
+
                 }
             }
             catch (Exception ex)

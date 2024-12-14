@@ -39,6 +39,9 @@ namespace InternetCafeManagement
         private void pictureBox2_Click(object sender, EventArgs e)
         {
             Order order= new Order();
+            order.user_balance=user_balance;
+            order.user_mail=user_mail;
+            
             order.Show();
             this.Hide();
         }
