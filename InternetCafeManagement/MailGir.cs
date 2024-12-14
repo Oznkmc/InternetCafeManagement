@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SqlClient;
 
 namespace InternetCafeManagement
 {
@@ -19,38 +20,64 @@ namespace InternetCafeManagement
             InitializeComponent();
         }
         public string user_mail {  get; set; }
+        string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
         public  void SendPasswordResetEmail(string userEmail, string resetCode)
         {
-            // Gönderen e-posta adresi ve şifresi (Gmail örneği)
-            string fromEmail = "oznkmc21@gmail.com";  // Gönderen e-posta adresini buraya yaz
-            string emailPassword = "nspw nifz ccjm rlza";  // E-posta şifresi (bu bilgiyi güvenli bir şekilde saklamalısınız)
-
-            // E-posta başlığı ve içeriği
-            string subject = "Şifre Yenileme Kodu";
-            string body = $"Şifrenizi sıfırlamak için aşağıdaki kodu kullanın:\n\n{resetCode}\n\nKodunuz 15 dakika geçerli olacaktır.";
-
-            // SMTP ayarları (Gmail için)
-            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com")
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                Port = 587,  // TLS portu
-                Credentials = new NetworkCredential(fromEmail, emailPassword),  // Gönderen e-posta ve uygulama şifresi
-                EnableSsl = true  // SSL/TLS bağlantısını etkinleştir
-            };
+                connection.Open();
+                SqlCommand command = new SqlCommand("select * from users where email=@UserMail", connection);
+                command.Parameters.AddWithValue("@UserMail", textBox1.Text);
+                SqlDataReader reader = command.ExecuteReader();
+                if(reader.Read())
+                {
+                    // Gönderen e-posta adresi ve şifresi (Gmail örneği)
+                    string fromEmail = "oznkmc21@gmail.com";  // Gönderen e-posta adresini buraya yaz
+                    string emailPassword = "nspw nifz ccjm rlza";  // E-posta şifresi (bu bilgiyi güvenli bir şekilde saklamalısınız)
 
-            // E-posta mesajı
-            MailMessage mailMessage = new MailMessage(fromEmail, userEmail, subject, body);
+                    // E-posta başlığı ve içeriği
+                    string subject = "Şifre Yenileme Kodu";
+                    string body = $"Şifrenizi sıfırlamak için aşağıdaki kodu kullanın:\n\n{resetCode}\n\nKodunuz 15 dakika geçerli olacaktır.";
 
-            try
-            {
-                // E-posta gönderimi
-                smtpClient.Send(mailMessage);
-                MessageBox.Show("Kodunuz Başarıyla Gönderildi");
+                    // SMTP ayarları (Gmail için)
+                    SmtpClient smtpClient = new SmtpClient("smtp.gmail.com")
+                    {
+                        Port = 587,  // TLS portu
+                        Credentials = new NetworkCredential(fromEmail, emailPassword),  // Gönderen e-posta ve uygulama şifresi
+                        EnableSsl = true  // SSL/TLS bağlantısını etkinleştir
+                    };
+
+                    // E-posta mesajı
+                    MailMessage mailMessage = new MailMessage(fromEmail, userEmail, subject, body);
+
+                    try
+                    {
+                        // E-posta gönderimi
+                        smtpClient.Send(mailMessage);
+                        MessageBox.Show("Kodunuz Başarıyla Gönderildi");
+                        DogrulamaKodu codeForm = new DogrulamaKodu(resetCode, userEmail);
+                        codeForm.userEmail = textBox1.Text;
+                        codeForm.Show();
+                        this.Hide();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Hata durumunda mesaj
+                        MessageBox.Show("E-posta gönderme hatası: " + ex.Message);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Böyle bir mail adresi mevcut değil.Tekrar Deneyiniz.");
+                    textBox1.Clear();
+                    
+                  
+                }
+
             }
-            catch (Exception ex)
-            {
-                // Hata durumunda mesaj
-               MessageBox.Show("E-posta gönderme hatası: " + ex.Message);
-            }
+
+
+          
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -70,10 +97,7 @@ namespace InternetCafeManagement
 
             // Kod ve kullanıcı e-posta adresini geçici bir veri yapısına kaydet
             // Örneğin, formu geçici olarak gizleyip kod onaylama formuna yönlendirebilirsin
-            this.Hide();
-            DogrulamaKodu codeForm = new DogrulamaKodu(resetCode, userEmail);
-            codeForm.userEmail = textBox1.Text;
-            codeForm.Show();
+          
         }
 
         private void button1_Click(object sender, EventArgs e)
