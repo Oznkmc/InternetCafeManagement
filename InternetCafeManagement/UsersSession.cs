@@ -18,7 +18,7 @@ namespace InternetCafeManagement
         public UsersSession()
         {
             InitializeComponent();
-           
+            
         }
         public bool user_role { get; set; }
         public string user_mail { get; set; }

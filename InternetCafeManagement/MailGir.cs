@@ -32,8 +32,8 @@ namespace InternetCafeManagement
                 if(reader.Read())
                 {
                     // Gönderen e-posta adresi ve şifresi (Gmail örneği)
-                    string fromEmail = "oznkmc21@gmail.com";  // Gönderen e-posta adresini buraya yaz
-                    string emailPassword = "nspw nifz ccjm rlza";  // E-posta şifresi (bu bilgiyi güvenli bir şekilde saklamalısınız)
+                    string fromEmail = "cafeemployer34@gmail.com";  // Gönderen e-posta adresini buraya yaz
+                    string emailPassword = "xawg fspw zlgn lbrd";  // E-posta şifresi (bu bilgiyi güvenli bir şekilde saklamalısınız)
 
                     // E-posta başlığı ve içeriği
                     string subject = "Şifre Yenileme Kodu";

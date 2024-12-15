@@ -219,7 +219,7 @@ namespace InternetCafeManagement
         {
             LoadAnaYemekItemsToListView("İçecek");
         }
-      public  ArrayList urunlerArray = new ArrayList();
+ 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
           
@@ -229,7 +229,7 @@ namespace InternetCafeManagement
                     ListViewItem selectedItem = listView1.SelectedItems[0];
                     string itemName = selectedItem.Text; // Ürün adı
                     decimal price = decimal.Parse(selectedItem.SubItems[1].Text, System.Globalization.NumberStyles.Currency); // Fiyat
-                    urunlerArray.Add(selectedItem.Text);
+                    
                     // Adet TextBox'ından değer al
                     if (int.TryParse(txtCount.Text, out int quantity) && quantity > 0)
                     {
@@ -256,42 +256,60 @@ namespace InternetCafeManagement
         public bool UsersSessionActive {  get; set; }
         public void UpdateUserBalance()
         {
-            using (SqlConnection connection=new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 try
                 {
                     connection.Open();
 
-                        SqlCommand updateBalance = new SqlCommand("Update users SET balance=balance-@TotalPrice where email=@userMail", connection);
+                    // Bakiyeyi güncelleyen sorgu
+                    SqlCommand updateBalance = new SqlCommand("UPDATE users SET balance = balance - @TotalPrice WHERE email = @userMail", connection);
                     updateBalance.Parameters.AddWithValue("@userMail", user_mail);
-                    updateBalance.Parameters.AddWithValue("@TotalPrice", Convert.ToDouble(totalprice));
-                    int row = updateBalance.ExecuteNonQuery();
-                    if (row != 0)
+
+                    // totalprice doğrudan double'a çevrilmeden önce kontrol ediliyor
+                    double totalPriceValue;
+                    if (!double.TryParse(totalprice.ToString(), out totalPriceValue))
                     {
-                        SqlCommand command1 = new SqlCommand("select balance from users where email=@UserMail", connection);
-                        command1.Parameters.AddWithValue("@UserMail", user_mail);
+                        throw new Exception("Geçerli bir toplam fiyat değeri sağlanmadı.");
+                    }
+                    updateBalance.Parameters.AddWithValue("@TotalPrice", totalPriceValue);
+
+                    // Güncelleme işlemini gerçekleştir
+                    int rowsAffected = updateBalance.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                    {
+                        // Yeni bakiye sorgusu
+                        SqlCommand command1 = new SqlCommand("SELECT balance FROM users WHERE email = @userMail", connection);
+                        command1.Parameters.AddWithValue("@userMail", user_mail);
+
                         object result = command1.ExecuteScalar();
-                        if (result != null)
+                        if (result != null && double.TryParse(result.ToString(), out double balance))
                         {
-                            double balance = (double)result;
-                            MessageBox.Show("Bakiyeniz Güncellendi. Yeni Bakiyeniz:" + balance);
+                            MessageBox.Show("Bakiyeniz Güncellendi. Yeni Bakiyeniz: " + balance);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Bakiyeniz alınamadı.");
                         }
                     }
-
+                    else
+                    {
+                        MessageBox.Show("Güncelleme işlemi başarısız oldu.");
+                    }
                 }
-                catch(Exception ex) 
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Hata Nedeni:" + ex.Message);
+                    MessageBox.Show("Hata Nedeni: " + ex.Message);
                 }
                 finally
                 {
                     connection.Close();
                 }
-
-                //}
-
             }
+
+
         }
+    
         private void button12_Click(object sender, EventArgs e)
         {
             if (listView1.Items.Count == 0)
@@ -375,16 +393,7 @@ namespace InternetCafeManagement
                 UpdateUserBalance();
             }
 
-            // Kullanıcı oturumu için bilgileri hazırlıyoruz
-            UsersSession usersSession = new UsersSession
-            {
-                user_balance = Convert.ToDouble(totalPrice),
-                //user_role = this.user_role,
-                user_mail = this.user_mail,
-                
-                secili_pc = this.secilipc, // Seçilen bilgisayar
-                hediyekullandi = true,
-            };
+           
 
             // Sipariş ekranını temizliyoruz
             listView1.Items.Clear();
