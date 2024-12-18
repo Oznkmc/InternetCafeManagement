@@ -148,13 +148,25 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            if (txtPassword.UseSystemPasswordChar == true)
+            if (textBox1.UseSystemPasswordChar == true)
             {
-                txtPassword.UseSystemPasswordChar = false;
+                textBox1.UseSystemPasswordChar = false;
             }
             else
             {
-                txtPassword.UseSystemPasswordChar = true;
+                textBox1.UseSystemPasswordChar = true;
+            }
+        }
+
+        private void pictureBox5_Click(object sender, EventArgs e)
+        {
+            if (textBox2.UseSystemPasswordChar == true)
+            {
+                textBox2.UseSystemPasswordChar = false;
+            }
+            else
+            {
+                textBox2.UseSystemPasswordChar = true;
             }
         }
     }
