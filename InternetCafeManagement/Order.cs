@@ -150,14 +150,35 @@ namespace InternetCafeManagement
                 reader.Close();
             }
         }
+        private void ShowPlaceholderMailGiris()
+        {
+            // Eğer TextBox boşsa placeholder göster
+            if (string.IsNullOrEmpty(txtCount.Text))
+            {
+                txtCount.Text = "Adet Giriniz";
+                txtCount.ForeColor = Color.Gray; // Placeholder rengi
+
+            }
+        }
+        private void HidePlaceholderMailGiris()
+        {
+            // Eğer placeholder görünüyorsa temizle
+            if (txtCount.Text == "Adet Giriniz")
+            {
+                txtCount.Text = "";
+                txtCount.ForeColor = Color.Black; // Yazı rengini normal yap
+
+            }
+        }
         private void Order_Load(object sender, EventArgs e)
         {
-            
+          
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             txtCount.Text += "1";
+           
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -413,6 +434,49 @@ namespace InternetCafeManagement
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
 
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            if (listView2.SelectedItems.Count > 0)
+            {
+                // Seçili öğeyi kaldır
+                listView2.Items.Remove(listView2.SelectedItems[0]);
+                MessageBox.Show("Seçili sipariş iptal edildi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtCount.Clear();
+            }
+            else
+            {
+                MessageBox.Show("Lütfen iptal etmek için bir sipariş seçiniz.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Oturum Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                this.Hide();
+            }
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
+        }
+
+        private void txtCount_Leave(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void txtCount_Enter(object sender, EventArgs e)
+        {
+           
         }
     }
 }

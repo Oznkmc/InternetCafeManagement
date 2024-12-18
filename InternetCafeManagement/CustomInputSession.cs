@@ -171,8 +171,8 @@ namespace InternetCafeManagement
                                     connection.Open();
                                     //Oturum bilgilerini kaydet
                                     SqlCommand addSession = new SqlCommand( 
-                                        "INSERT INTO sessions (user_id, computer_id, start_time) " +
-                                        "VALUES (@UserId, @ComputerId, @StartTime)", connection);
+                                        "INSERT INTO sessions (user_id, computer_id, start_time,status) " +
+                                        "VALUES (@UserId, @ComputerId, @StartTime,1)", connection);
                                     addSession.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
                                     addSession.Parameters.AddWithValue("@ComputerId", GetComputerId(secili_pc));
 
