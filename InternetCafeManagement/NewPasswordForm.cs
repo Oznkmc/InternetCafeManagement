@@ -58,5 +58,34 @@ namespace InternetCafeManagement
                 
             }
         }
+
+        private void NewPasswordForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            string newPassword = textBox1.Text.Trim();
+            if (string.IsNullOrEmpty(newPassword))
+            {
+                MessageBox.Show("Yeni şifreyi girin.");
+                return;
+            }
+            if(textBox1.Text==textBox2.Text)
+            {
+                // Şifreyi veritabanına güncelle
+                UpdatePassword(userEmail, newPassword);
+
+                MessageBox.Show("Şifreniz başarıyla güncellendi.");
+            }
+            else
+            {
+                MessageBox.Show("Şifre uyumu başarısız.");
+                textBox2.Clear();
+                textBox1.Clear();
+            }
+           
+        }
     }
 }
