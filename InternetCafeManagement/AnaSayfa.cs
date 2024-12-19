@@ -33,7 +33,7 @@ namespace InternetCafeManagement
             sessions.user_mail = user_mail;
             
             sessions.Show();
-            this.Hide();
+           
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
@@ -43,7 +43,7 @@ namespace InternetCafeManagement
             order.user_mail=user_mail;
             
             order.Show();
-            this.Hide();
+            
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)

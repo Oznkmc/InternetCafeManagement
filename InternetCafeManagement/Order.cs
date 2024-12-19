@@ -412,6 +412,7 @@ namespace InternetCafeManagement
             {
                 orderId = SaveOrderToDatabaseInActiveUsersSession(totalPrice, payment_method);
                 UpdateUserBalance();
+
             }
 
            
@@ -453,11 +454,7 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Oturum Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (result == DialogResult.Yes)
-            {
-                this.Hide();
-            }
+            this.Hide();
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)

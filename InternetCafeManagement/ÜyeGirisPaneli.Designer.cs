@@ -45,10 +45,10 @@
             // 
             // txtMail
             // 
-            this.txtMail.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.txtMail.Location = new System.Drawing.Point(279, 205);
+            this.txtMail.Font = new System.Drawing.Font("Microsoft Sans Serif", 25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.txtMail.Location = new System.Drawing.Point(269, 197);
             this.txtMail.Name = "txtMail";
-            this.txtMail.Size = new System.Drawing.Size(341, 49);
+            this.txtMail.Size = new System.Drawing.Size(351, 55);
             this.txtMail.TabIndex = 0;
             // 
             // txtPassword
@@ -63,6 +63,7 @@
             // 
             // pictureBox1
             // 
+            this.pictureBox1.BackColor = System.Drawing.SystemColors.Control;
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(279, 379);
             this.pictureBox1.Name = "pictureBox1";

@@ -498,6 +498,7 @@ namespace InternetCafeManagement
             this.Hide();
         }
         public decimal totalprice;
+        public int secili_oturum {  get; set; }
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             //try
@@ -608,6 +609,7 @@ namespace InternetCafeManagement
                         if (resultSessionID != null)
                         {
                             int sessionid1 = (int)resultSessionID;
+                            secili_oturum =sessionid1;
                             OrderPrice.Parameters.AddWithValue("@session_id", sessionid1);
 
                             OrderPrice.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
@@ -722,6 +724,8 @@ namespace InternetCafeManagement
         private void pictureBox11_Click(object sender, EventArgs e)
         {
            ControlOrder control=new ControlOrder(); 
+            control.user_mail = this.user_mail;
+            control.secili_oturum = this.secili_oturum;
             control.Show();
 
         }
