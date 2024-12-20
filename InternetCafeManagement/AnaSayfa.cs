@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace InternetCafeManagement
 {
@@ -143,6 +144,9 @@ namespace InternetCafeManagement
                     int userId = (int)IDresult;
 
                     // Hediye bilgilerini almak için sorgu
+                    string reward = null;
+                    bool isClaimed = false;
+
                     SqlCommand giftCommand = new SqlCommand("SELECT reward, is_claimed FROM gift_wheel WHERE user_id = @UserID", connection);
                     giftCommand.Parameters.AddWithValue("@UserID", userId);
 
@@ -154,67 +158,73 @@ namespace InternetCafeManagement
                             return;
                         }
 
-                        string reward = reader["reward"]?.ToString();
-                        bool isClaimed = reader["is_claimed"] != DBNull.Value && Convert.ToBoolean(reader["is_claimed"]);
+                        reward = reader["reward"]?.ToString();
+                        isClaimed = reader["is_claimed"] != DBNull.Value && Convert.ToBoolean(reader["is_claimed"]);
+                    } // Reader burada kapandı
 
-                        if (reward == null)
+                    if (reward == null)
+                    {
+                        MessageBox.Show("Hediye bilgisi eksik.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    if (isClaimed)
+                    {
+                        MessageBox.Show("Hediye zaten kullanılmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    // Hediye bilgisi ile kullanıcıya onay sorusu
+                    DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (result2 == DialogResult.Yes)
+                    {
+                        // Hediye kullanımı
+                        secilihediye = reward;
+                        SqlCommand command = new SqlCommand("UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserId", connection);
+                        command.Parameters.AddWithValue("@UserId", userId);
+                        int row = command.ExecuteNonQuery();
+
+                        if (row == 0)
                         {
-                            MessageBox.Show("Hediye bilgisi eksik.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Başarısız Güncelleme", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
 
-                        if (isClaimed)
+                        GamePoints points = new GamePoints
                         {
-                            MessageBox.Show("Hediye zaten kullanılmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            return;
-                        }
-
-                        DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                        if (result2 == DialogResult.Yes)
+                            user_balance = user_balance,
+                            user_mail = user_mail,
+                            hediyekullandi = true,
+                            secilihediye = secilihediye
+                        };
+                        points.Show();
+                        this.Hide();
+                    }
+                    else
+                    {
+                        // Hediye kullanmama
+                        GamePoints points = new GamePoints
                         {
-                            // Hediye kullanımı
-                            secilihediye = reward;
-                            SqlCommand command = new SqlCommand("Update gift_wheel set is_claimed=1 where user_id=@UserId", connection);
-                            command.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
-                            int row=command.ExecuteNonQuery();
-                            if (row!= 0)
-                            {
-                                MessageBox.Show("Başarısız Güncelleme");
-                            }
-                            //Öncelikle kapatılması gereken açık datareader falan var
-                            GamePoints points = new GamePoints
-                            {
-                                user_balance = user_balance,
-                                user_mail = user_mail,
-                                hediyekullandi = true,
-                                secilihediye = secilihediye
-                            };
-                            points.Show();
-                            this.Hide();
-                        }
-                        else
-                        {
-                            // Hediye kullanmama
-                            GamePoints points = new GamePoints
-                            {
-                                user_balance = user_balance,
-                                user_mail = user_mail,
-                                hediyekullandi = false
-                            };
-                            points.Show();
-                            this.Hide();
-                        }
+                            user_balance = user_balance,
+                            user_mail = user_mail,
+                            hediyekullandi = false
+                        };
+                        points.Show();
+                        this.Hide();
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Hatanız: " + ex.Message);
+                    MessageBox.Show("Hata: " + ex.Message);
                 }
                 finally
                 {
                     connection.Close();
                 }
             }
+
+
 
         }
     }
