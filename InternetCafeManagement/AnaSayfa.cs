@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SqlClient;
 
 namespace InternetCafeManagement
 {
@@ -17,8 +18,11 @@ namespace InternetCafeManagement
             InitializeComponent();
         }
         public bool user_role { get; set; }
-        public string user_mail {  get; set; }
+        public string user_mail { get; set; }
         public double user_balance { get; set; }
+        string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
+
+
 
         private void AnaSayfa_Load(object sender, EventArgs e)
         {
@@ -31,19 +35,19 @@ namespace InternetCafeManagement
             sessions.user_balance = user_balance;
             sessions.user_role = user_role;
             sessions.user_mail = user_mail;
-            
+
             sessions.Show();
-           
+
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
         {
-            Order order= new Order();
-            order.user_balance=user_balance;
-            order.user_mail=user_mail;
-            
+            Order order = new Order();
+            order.user_balance = user_balance;
+            order.user_mail = user_mail;
+
             order.Show();
-            
+
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)
@@ -60,7 +64,7 @@ namespace InternetCafeManagement
         {
 
             Wheel wheel = new Wheel();
-            wheel.usermail=user_mail;
+            wheel.usermail = user_mail;
             wheel.user_balance = user_balance;
             wheel.user_rol = user_role;
             wheel.Show();
@@ -94,6 +98,124 @@ namespace InternetCafeManagement
             {
                 Application.Exit();
             }
+        }
+        private int GetUserId(string email)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email = @Email", connection);
+                    command.Parameters.AddWithValue("@Email", email);
+
+                    object userId = command.ExecuteScalar();
+                    return userId != null ? Convert.ToInt32(userId) : 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Kullanıcı ID alınırken bir hata oluştu: " + ex.Message);
+                return 0;
+            }
+        }
+        public string secilihediye;
+        private void pictureBox1_Click_1(object sender, EventArgs e)
+        {
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    // Kullanıcı ID'sini almak için sorgu
+                    SqlCommand idgetir = new SqlCommand("SELECT user_id FROM users WHERE email = @UserMail", connection);
+                    idgetir.Parameters.AddWithValue("@UserMail", user_mail);
+                    object IDresult = idgetir.ExecuteScalar();
+
+                    if (IDresult == null)
+                    {
+                        MessageBox.Show("Kullanıcı ID'si bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    int userId = (int)IDresult;
+
+                    // Hediye bilgilerini almak için sorgu
+                    SqlCommand giftCommand = new SqlCommand("SELECT reward, is_claimed FROM gift_wheel WHERE user_id = @UserID", connection);
+                    giftCommand.Parameters.AddWithValue("@UserID", userId);
+
+                    using (SqlDataReader reader = giftCommand.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            MessageBox.Show("Hediye bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            return;
+                        }
+
+                        string reward = reader["reward"]?.ToString();
+                        bool isClaimed = reader["is_claimed"] != DBNull.Value && Convert.ToBoolean(reader["is_claimed"]);
+
+                        if (reward == null)
+                        {
+                            MessageBox.Show("Hediye bilgisi eksik.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
+                        if (isClaimed)
+                        {
+                            MessageBox.Show("Hediye zaten kullanılmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            return;
+                        }
+
+                        DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result2 == DialogResult.Yes)
+                        {
+                            // Hediye kullanımı
+                            secilihediye = reward;
+                            SqlCommand command = new SqlCommand("Update gift_wheel set is_claimed=1 where user_id=@UserId", connection);
+                            command.Parameters.AddWithValue("@UserId", GetUserId(user_mail));
+                            int row=command.ExecuteNonQuery();
+                            if (row!= 0)
+                            {
+                                MessageBox.Show("Başarısız Güncelleme");
+                            }
+                            //Öncelikle kapatılması gereken açık datareader falan var
+                            GamePoints points = new GamePoints
+                            {
+                                user_balance = user_balance,
+                                user_mail = user_mail,
+                                hediyekullandi = true,
+                                secilihediye = secilihediye
+                            };
+                            points.Show();
+                            this.Hide();
+                        }
+                        else
+                        {
+                            // Hediye kullanmama
+                            GamePoints points = new GamePoints
+                            {
+                                user_balance = user_balance,
+                                user_mail = user_mail,
+                                hediyekullandi = false
+                            };
+                            points.Show();
+                            this.Hide();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Hatanız: " + ex.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+
         }
     }
 }

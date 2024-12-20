@@ -170,13 +170,13 @@ namespace InternetCafeManagement
             hediyeler.Add("200 liralık atıştırmalık hakkı");
             hediyeler.Add("Beypazarı Soda");
             hediyeler.Add("Kutu Kola");
-            hediyeler.Add("1000 Valorant Point");
-            hediyeler.Add("130 Valorant Point");
-            hediyeler.Add("475 Valorant Point");
-            hediyeler.Add("2050 Valorant Point");
-            hediyeler.Add("575 Riot Points");
-            hediyeler.Add("1380 Riot Points");
-            hediyeler.Add("2800 Riot Points");
+            hediyeler.Add("1000 VP");
+            hediyeler.Add("2050 VP");
+            hediyeler.Add("5350 VP");
+            
+            hediyeler.Add("2800 RP");
+            hediyeler.Add("5000 RP");
+            hediyeler.Add("7200 RP");
 
             if (!timer1.Enabled)
             {
