@@ -38,6 +38,7 @@ namespace InternetCafeManagement
             sessions.user_mail = user_mail;
 
             sessions.Show();
+            this.Hide();
 
         }
 
@@ -48,7 +49,7 @@ namespace InternetCafeManagement
             order.user_mail = user_mail;
 
             order.Show();
-
+            this.Hide();
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)
@@ -121,9 +122,9 @@ namespace InternetCafeManagement
             }
         }
         public string secilihediye;
+
         private void pictureBox1_Click_1(object sender, EventArgs e)
         {
-
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 try
@@ -152,29 +153,47 @@ namespace InternetCafeManagement
 
                     using (SqlDataReader reader = giftCommand.ExecuteReader())
                     {
-                        if (!reader.Read())
+                        if (reader.Read())
                         {
-                            MessageBox.Show("Hediye bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            return;
+                            reward = reader["reward"]?.ToString();
+                            isClaimed = reader["is_claimed"] != DBNull.Value && Convert.ToBoolean(reader["is_claimed"]);
                         }
-
-                        reward = reader["reward"]?.ToString();
-                        isClaimed = reader["is_claimed"] != DBNull.Value && Convert.ToBoolean(reader["is_claimed"]);
                     } // Reader burada kapandı
 
+                    // Hediye bilgisi kontrolü
                     if (reward == null)
                     {
-                        MessageBox.Show("Hediye bilgisi eksik.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Hediye bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // GamePoints formunu hediye olmadan aç
+                        GamePoints points = new GamePoints
+                        {
+                            user_balance = user_balance,
+                            user_mail = user_mail,
+                            user_role = user_role,
+                            hediyekullandi = false
+                        };
+                        points.Show();
+                        this.Hide();
                         return;
                     }
 
                     if (isClaimed)
                     {
                         MessageBox.Show("Hediye zaten kullanılmış.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // Hediye daha önce kullanılmış, GamePoints formunu aç
+                        GamePoints points = new GamePoints
+                        {
+                            user_balance = user_balance,
+                            user_role=user_role,
+                            user_mail = user_mail,
+                            hediyekullandi = false
+                        };
+                        points.Show();
+                        this.Hide();
                         return;
                     }
 
-                    // Hediye bilgisi ile kullanıcıya onay sorusu
+                    // Sadece kullanılabilir bir hediye varsa onay sor
                     DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                     if (result2 == DialogResult.Yes)
@@ -195,6 +214,7 @@ namespace InternetCafeManagement
                         {
                             user_balance = user_balance,
                             user_mail = user_mail,
+                            user_role = user_role,
                             hediyekullandi = true,
                             secilihediye = secilihediye
                         };
@@ -208,6 +228,7 @@ namespace InternetCafeManagement
                         {
                             user_balance = user_balance,
                             user_mail = user_mail,
+                            user_role = user_role,
                             hediyekullandi = false
                         };
                         points.Show();
@@ -223,9 +244,19 @@ namespace InternetCafeManagement
                     connection.Close();
                 }
             }
+        }
 
+        private void pictureBox6_Click(object sender, EventArgs e)
+        {
+            ÜyeGirisPaneli üyeGirisPaneli = new ÜyeGirisPaneli();
+            DialogResult result = MessageBox.Show("Üye Giriş Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                
 
-
+                this.Hide();
+                üyeGirisPaneli.Show(); // Admin formunu göster
+            }
         }
     }
 }

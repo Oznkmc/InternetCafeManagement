@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace InternetCafeManagement
 {
@@ -24,6 +25,7 @@ namespace InternetCafeManagement
         DataSet ds = new DataSet();
         public string usermail { get; set; }
         public bool user_role { get; set; }
+        public double user_balance {  get; set; }
         void griddoldur()
         {
 
@@ -220,7 +222,9 @@ namespace InternetCafeManagement
                 admin Admin = new admin
                 {
                     role = this.user_role,
-                    usermail = this.usermail
+                    usermail = this.usermail,
+                    balance=this.user_balance
+                    
                 };
 
                 this.Hide();
@@ -234,6 +238,86 @@ namespace InternetCafeManagement
             if (result == DialogResult.Yes)
             {
                 Application.Exit();
+            }
+        }
+        private int GetUserIdByEmail(string email)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email = @Email", connection);
+                    command.Parameters.AddWithValue("@Email", email);
+
+                    object userId = command.ExecuteScalar();
+                    return userId != null ? Convert.ToInt32(userId) : 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Kullanıcı ID alınırken bir hata oluştu: " + ex.Message);
+                return 0;
+            }
+        }
+
+        // user_id'ye göre gift_wheel tablosundaki verileri almak için metod
+        private void GetGiftWheelDataByUserId(int userId)
+        {
+            con = new SqlConnection(connectionString);
+
+            // user_id ile gift_wheel tablosundaki verileri çekme
+            SqlCommand command = new SqlCommand(
+                "SELECT * FROM gift_wheel WHERE user_id = @UserId", con
+            );
+            command.Parameters.AddWithValue("@UserId", userId);
+
+            da = new SqlDataAdapter(command);
+            ds = new DataSet();
+
+            try
+            {
+                con.Open();
+                da.Fill(ds, "gift_wheel");
+
+                // DataGridView'e verileri aktarma
+                if (ds.Tables["gift_wheel"].Rows.Count > 0)
+                {
+                    dataGridView1.DataSource = ds.Tables["gift_wheel"];
+                }
+                else
+                {
+                    MessageBox.Show("Bu kullanıcıya ait hediye çarkı bilgisi bulunamadı.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Veri çekilirken bir hata oluştu: " + ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            string email = txtUserName.Text;  // TextBox1'den email alınır
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                int userId = GetUserIdByEmail(email); // Email'e göre user_id al
+                if (userId > 0)
+                {
+                    GetGiftWheelDataByUserId(userId);  // user_id'ye göre gift_wheel verilerini al
+                }
+                else
+                {
+                    MessageBox.Show("Email'e ait kullanıcı bulunamadı.");
+                }
+            }
+            else
+            {
+                griddoldur();
             }
         }
     }

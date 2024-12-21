@@ -48,12 +48,14 @@
             this.label6 = new System.Windows.Forms.Label();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureUpdate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureDelete)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictrureAdd)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // dataGridView1
@@ -144,7 +146,7 @@
             this.pictureUpdate.Location = new System.Drawing.Point(1174, 109);
             this.pictureUpdate.Name = "pictureUpdate";
             this.pictureUpdate.Size = new System.Drawing.Size(100, 95);
-            this.pictureUpdate.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureUpdate.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureUpdate.TabIndex = 7;
             this.pictureUpdate.TabStop = false;
             this.pictureUpdate.Click += new System.EventHandler(this.pictureUpdate_Click);
@@ -152,10 +154,10 @@
             // pictureDelete
             // 
             this.pictureDelete.Image = ((System.Drawing.Image)(resources.GetObject("pictureDelete.Image")));
-            this.pictureDelete.Location = new System.Drawing.Point(1174, 254);
+            this.pictureDelete.Location = new System.Drawing.Point(1174, 223);
             this.pictureDelete.Name = "pictureDelete";
             this.pictureDelete.Size = new System.Drawing.Size(100, 95);
-            this.pictureDelete.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureDelete.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureDelete.TabIndex = 8;
             this.pictureDelete.TabStop = false;
             this.pictureDelete.Click += new System.EventHandler(this.pictureDelete_Click);
@@ -163,10 +165,10 @@
             // pictrureAdd
             // 
             this.pictrureAdd.Image = ((System.Drawing.Image)(resources.GetObject("pictrureAdd.Image")));
-            this.pictrureAdd.Location = new System.Drawing.Point(1174, 412);
+            this.pictrureAdd.Location = new System.Drawing.Point(1174, 335);
             this.pictrureAdd.Name = "pictrureAdd";
             this.pictrureAdd.Size = new System.Drawing.Size(100, 95);
-            this.pictrureAdd.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictrureAdd.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictrureAdd.TabIndex = 9;
             this.pictrureAdd.TabStop = false;
             this.pictrureAdd.Click += new System.EventHandler(this.pictureAdd_Click);
@@ -253,11 +255,23 @@
             this.pictureBox3.TabStop = false;
             this.pictureBox3.Click += new System.EventHandler(this.pictureBox3_Click_1);
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(1174, 448);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(100, 95);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 27;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
             // Users
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1320, 778);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.pictureBox3);
             this.Controls.Add(this.pictureBox4);
             this.Controls.Add(this.label6);
@@ -285,6 +299,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictrureAdd)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -310,5 +325,6 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }

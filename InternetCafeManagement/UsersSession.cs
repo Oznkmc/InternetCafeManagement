@@ -592,65 +592,57 @@ namespace InternetCafeManagement
                         reader.Close();
                         // Eğer hediye yoksa, balance güncellenecek
 
-                        SqlCommand OrderPrice = new SqlCommand(
-     "SELECT TOP 1 o.TotalAmount AS TotalAmount " +
-     "FROM Orders o " +
-     "INNER JOIN sessions s ON o.SessionID = s.session_id " +
-     "INNER JOIN users u ON o.CustomerID = u.user_id " +
-     "WHERE u.user_id = @UserID " +
-     "AND s.session_id = @session_id " +
-     "AND s.start_time = (SELECT MAX(start_time) FROM sessions WHERE session_id = o.SessionID) " +
-     "ORDER BY s.start_time DESC;",
-     connection
- );
-                        SqlCommand sessionidgetir = new SqlCommand("select session_id from sessions where status=1 and computer_id=@ComputerID", connection);
+                        SqlCommand sessionidgetir = new SqlCommand(
+        "SELECT session_id FROM sessions WHERE status = 1 AND computer_id = @ComputerID",
+        connection
+    );
                         sessionidgetir.Parameters.AddWithValue("@ComputerID", GetComputerId(secili_pc));
-                        object resultSessionID= sessionidgetir.ExecuteScalar();
+                        object resultSessionID = sessionidgetir.ExecuteScalar();
+
                         if (resultSessionID != null)
                         {
                             int sessionid1 = (int)resultSessionID;
-                            secili_oturum =sessionid1;
-                            OrderPrice.Parameters.AddWithValue("@session_id", sessionid1);
+                            secili_oturum = sessionid1;
 
-                            OrderPrice.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
-                            object result8 = OrderPrice.ExecuteScalar();
-                            if (result8 != null)
+                            SqlCommand UpdateSession = new SqlCommand(
+                                "UPDATE sessions SET end_time = @EndDate, status = 0 WHERE session_id = @SessionID",
+                                connection
+                            );
+                            UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            UpdateSession.Parameters.AddWithValue("@SessionID", sessionid1);
+
+                            int row = UpdateSession.ExecuteNonQuery();
+
+                            if (row > 0)
                             {
-                                decimal totalamountgetir = (decimal)result8;
-
-                                SqlCommand balanceUpdate = new SqlCommand("UPDATE users SET balance = balance - @SessionBalance WHERE email = @UserMail", connection);
-
-                                balanceUpdate.Parameters.AddWithValue("@SessionBalance", Convert.ToDecimal(sessionBalance) + totalamountgetir); // Kalan süreyi dakika cinsinden balance'dan düş
-
-                                balanceUpdate.Parameters.AddWithValue("@UserMail", user_mail);
-                                balanceUpdate.ExecuteNonQuery();
-                                SqlCommand UpdateSession = new SqlCommand("Update sessions set total_price=total_price+@TotalPrice,end_time=@EndDate, status=0 where session_id=@SessionID", connection);
-                                UpdateSession.Parameters.AddWithValue("@TotalPrice", Convert.ToDecimal(totalamountgetir));
-                                UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                                UpdateSession.Parameters.AddWithValue("@SessionID", sessionid1);
-                                int row = UpdateSession.ExecuteNonQuery();
-
-
-                                MessageBox.Show("Oturum başarıyla kapatıldı. Kullanılabilir süreniz bitti, balance güncellendi.", "Oturum Kapatıldı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                MessageBox.Show("Oturum başarıyla kapatıldı.", "Oturum Kapatıldı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Oturum kapatma sırasında bir hata oluştu.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
-                    }
+                        else
+                        {
+                            MessageBox.Show("Aktif bir oturum bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
 
-                    
 
-                    SqlCommand SessionID = new SqlCommand("select session_id from sessions where user_id=@GetUserID  and status=1", connection);
-                    SessionID.Parameters.AddWithValue("@GetUserID", GetUserId(user_mail));
-                    object result7 = SessionID.ExecuteScalar();
-                    if (result7 != null)
-                    {
-                        int SessionIDgetir=(int) result7;
-                        //SqlCommand UpdateSession = new SqlCommand("Update sessions set total_price=total_price+@TotalPrice,end_time=@EndDate, status=0 where session_id=@SessionID", connection);
-                        //UpdateSession.Parameters.AddWithValue("@TotalPrice", Convert.ToDecimal(totalprice));
-                        //UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                        //UpdateSession.Parameters.AddWithValue("@SessionID", SessionIDgetir);
-                        //int row=UpdateSession.ExecuteNonQuery();
-                        //if (row != 0)
-                        //{
+
+
+                        SqlCommand SessionID = new SqlCommand("select session_id from sessions where user_id=@GetUserID  and status=1", connection);
+                        SessionID.Parameters.AddWithValue("@GetUserID", GetUserId(user_mail));
+                        object result7 = SessionID.ExecuteScalar();
+                        if (result7 != null)
+                        {
+                            int SessionIDgetir = (int)result7;
+                            //SqlCommand UpdateSession = new SqlCommand("Update sessions set total_price=total_price+@TotalPrice,end_time=@EndDate, status=0 where session_id=@SessionID", connection);
+                            //UpdateSession.Parameters.AddWithValue("@TotalPrice", Convert.ToDecimal(totalprice));
+                            //UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                            //UpdateSession.Parameters.AddWithValue("@SessionID", SessionIDgetir);
+                            //int row=UpdateSession.ExecuteNonQuery();
+                            //if (row != 0)
+                            //{
 
                             // Hediye kullanıldıktan sonra 'used_time' güncelleniyor
                             SqlCommand updateUsedTime = new SqlCommand("UPDATE gift_wheel SET used_time = ISNULL(used_time, 0) + @UsedTime, is_claimed = 1 WHERE user_id = @UserID", connection);
@@ -658,36 +650,37 @@ namespace InternetCafeManagement
                             updateUsedTime.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
                             updateUsedTime.ExecuteNonQuery(); // Güncellemeyi yap
                             MessageBox.Show("Oturum Başarıyla Güncellenmiştir.Bir Daha Bekleriz.");
-                        //}
+                            //}
+                        }
+
+
+
+
+
+
+
+
+
+
+
+
+                        // Bilgisayar durumunu güncelle
+                        SqlCommand updateComputerStatus = new SqlCommand(
+                            "UPDATE computers SET status = 'available' WHERE name = @ComputerName", connection);
+                        updateComputerStatus.Parameters.AddWithValue("@ComputerName", secili_pc);
+                        updateComputerStatus.ExecuteNonQuery();
                     }
 
-                   
-
-
-
-
-
-
-
-
-
-
-                    // Bilgisayar durumunu güncelle
-                    SqlCommand updateComputerStatus = new SqlCommand(
-                        "UPDATE computers SET status = 'available' WHERE name = @ComputerName", connection);
-                    updateComputerStatus.Parameters.AddWithValue("@ComputerName", secili_pc);
-                    updateComputerStatus.ExecuteNonQuery();
+                    // Oturum kapatma işlemi tamamlandıktan sonra ana menüye dön
+                    Sessions sessionsForm = new Sessions
+                    {
+                        user_role = this.user_role,
+                        user_mail = this.user_mail,
+                        user_balance = this.user_balance,
+                    };
+                    sessionsForm.Show();
+                    this.Close();
                 }
-
-                // Oturum kapatma işlemi tamamlandıktan sonra ana menüye dön
-                Sessions sessionsForm = new Sessions
-                {
-                    user_role = this.user_role,
-                    user_mail = this.user_mail,
-                    user_balance = this.user_balance,
-                };
-                sessionsForm.Show();
-                this.Close();
             }
             catch (Exception ex)
             {
@@ -725,7 +718,7 @@ namespace InternetCafeManagement
         {
            ControlOrder control=new ControlOrder(); 
             control.user_mail = this.user_mail;
-            control.secili_oturum = this.secili_oturum;
+            //control.secili_oturum = this.secili_oturum;
             control.Show();
 
         }

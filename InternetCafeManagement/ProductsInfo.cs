@@ -24,6 +24,7 @@ namespace InternetCafeManagement
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
         public bool user_role { get; set; }
+        public double user_balance {  get; set; }
         public string user_mail { get; set; }
         void griddoldur()
         {
@@ -256,6 +257,56 @@ namespace InternetCafeManagement
             if (result == DialogResult.Yes)
             {
                 Application.Exit();
+            }
+        }
+        private void GetProductsByName(string productName)
+        {
+            con = new SqlConnection(connectionString);
+
+            // name kolonuna göre ürünleri sorgulama
+            SqlCommand command = new SqlCommand(
+                "SELECT * FROM products WHERE name LIKE @ProductName", con
+            );
+            command.Parameters.AddWithValue("@ProductName", "%" + productName + "%"); // Kısmi eşleşme için LIKE kullanılır
+
+            da = new SqlDataAdapter(command);
+            ds = new DataSet();
+
+            try
+            {
+                con.Open();
+                da.Fill(ds, "products");
+
+                // DataGridView'e verileri aktarma
+                if (ds.Tables["products"].Rows.Count > 0)
+                {
+                    dataGridView1.DataSource = ds.Tables["products"];
+                }
+                else
+                {
+                    MessageBox.Show("Girilen isme uygun ürün bulunamadı.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Veri çekilirken bir hata oluştu: " + ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            string productName = txtUrunName.Text;  // TextBox1'den ürün adı alınır
+
+            if (!string.IsNullOrEmpty(productName))
+            {
+                GetProductsByName(productName);  // Ürün adına göre ürünleri listele
+            }
+            else
+            {
+                griddoldur();
             }
         }
     }

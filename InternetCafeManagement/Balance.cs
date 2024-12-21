@@ -109,17 +109,27 @@ namespace InternetCafeManagement
 
         private void pictureBox3_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
         }
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            AnaSayfa ana = new AnaSayfa();
-            ana.user_mail = usermail;
-            ana.user_balance = userbalance;
-            ana.user_role = userrole;
-            ana.Show();
-            this.Hide();
+            DialogResult result = MessageBox.Show("Ana Sayfaya Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                AnaSayfa anaSayfa = new AnaSayfa();
+                anaSayfa.user_role = this.userrole;
+                anaSayfa.user_balance = this.userbalance;
+                anaSayfa.user_mail = this.usermail;
+
+                anaSayfa.Show();
+                this.Hide();
+            }
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)

@@ -22,6 +22,7 @@ namespace InternetCafeManagement
         public string user_mail {  get; set; }
         public bool hediyekullandi {  get; set; }
         public string secilihediye {  get; set; }
+        public bool user_role {  get; set; }
         private int GetUserId(string email)
         {
             int userId = 0;
@@ -142,66 +143,54 @@ namespace InternetCafeManagement
 
                 if (!string.IsNullOrEmpty(secilihediye))
                 {
+                    // Hediye ile işlem yapılacaksa, siparişi oluşturuyoruz
                     foreach (ListViewItem item in listView2.Items)
                     {
                         if (item.SubItems[1].Text == secilihediye)
                         {
                             string gameName = item.SubItems[0].Text;
                             string pointType = new string(secilihediye.Where(char.IsLetter).ToArray());
-                            int quantity = int.Parse(new string(secilihediye.Where(char.IsDigit).ToArray()));
-                            SqlCommand giftCommand = new SqlCommand("SELECT reward, is_claimed FROM gift_wheel WHERE user_id = @UserID", connection);
-                            giftCommand.Parameters.AddWithValue("@UserID", userId);
-                            object claimedResult=giftCommand.ExecuteScalar();
-                            if(claimedResult!=null && claimedResult!=DBNull.Value)
+                            int quantity = int.Parse(new string(secilihediye.Where(char.IsDigit).ToArray())); // Adet sayısı
+
+                            using (SqlCommand insertCommand = new SqlCommand(
+                                "INSERT INTO GamePoints_Sales (GameName, PointType, Quantity, Price, TotalPrice, UserID, PaymentMethod) " +
+                                "VALUES (@GameName, @PointType, @Quantity, @Price, 0, @UserID, 'Hediye')",
+                                connection))
                             {
-                                bool claimed=(bool) claimedResult;
-                                if(!claimed)
-                                {
-                                    using (SqlCommand insertCommand = new SqlCommand(
-                                                            "INSERT INTO GamePoints_Sales (GameName, PointType, Quantity, Price, TotalPrice, UserID, PaymentMethod) " +
-                                                            "VALUES (@GameName, @PointType, @Quantity, @Price, 0, @UserID, 'Hediye')",
-                                                            connection))
-                                    {
-                                        insertCommand.Parameters.AddWithValue("@GameName", gameName);
-                                        insertCommand.Parameters.AddWithValue("@PointType", pointType);
-                                        insertCommand.Parameters.AddWithValue("@Quantity", quantity);
-                                        insertCommand.Parameters.AddWithValue("@Price", 0);
-                                        insertCommand.Parameters.AddWithValue("@UserID", userId);
+                                insertCommand.Parameters.AddWithValue("@GameName", gameName);
+                                insertCommand.Parameters.AddWithValue("@PointType", pointType);
+                                insertCommand.Parameters.AddWithValue("@Quantity", quantity);
+                                insertCommand.Parameters.AddWithValue("@Price", 0);  // Hediye olduğu için fiyat 0
+                                insertCommand.Parameters.AddWithValue("@UserID", userId);
 
-                                        insertCommand.ExecuteNonQuery();
-                                    }
-                                }
-                                else
-                                {
-
-                                }
-                                
+                                insertCommand.ExecuteNonQuery();
                             }
-                         
                         }
                     }
-                    SqlCommand command1 = new SqlCommand("Update gift_wheel set is_claimed=1 where user_id=@UserID", connection);
+
+                    SqlCommand command1 = new SqlCommand("UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserID", connection);
                     command1.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
-                    int row1= command1.ExecuteNonQuery();
-                    if(row1>0)
+                    int row1 = command1.ExecuteNonQuery();
+
+                    if (row1 > 0)
                     {
                         MessageBox.Show("Hediye kullanılarak sipariş tamamlandı!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
-                    
                 }
                 else
                 {
                     decimal userBalance;
 
+                    // Kullanıcı bakiyesini çekiyoruz
                     using (SqlCommand balanceCommand = new SqlCommand("SELECT Balance FROM Users WHERE user_id = @UserID", connection))
                     {
-                        balanceCommand.Parameters.AddWithValue("@UserID", userId);
+                        balanceCommand.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
 
                         using (SqlDataReader reader = balanceCommand.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                userBalance = reader.GetDecimal(0);
+                                userBalance = reader.GetDecimal(0);  // Kullanıcı bakiyesini alıyoruz
                             }
                             else
                             {
@@ -211,23 +200,77 @@ namespace InternetCafeManagement
                         }
                     }
 
-                    decimal totalPrice = listView2.Items.Cast<ListViewItem>()
-                        .Sum(item => decimal.Parse(item.SubItems[2].Text) * int.Parse(new string(item.SubItems[1].Text.Where(char.IsDigit).ToArray())));
+                    decimal totalPrice = 0;
 
+                    // Siparişin toplam fiyatını hesaplıyoruz
+                    foreach (ListViewItem item in listView2.Items)
+                    {
+                        string pointType = item.SubItems[1].Text;  // Puan türünü alıyoruz (örneğin: "475 VP")
+                        int quantity = int.Parse(new string(item.SubItems[2].Text.Where(char.IsDigit).ToArray())); // Adet sayısını alıyoruz (örneğin: "2")
+
+                        decimal price = 0;
+
+                        // Puan türüne göre fiyatı alıyoruz
+                        using (SqlCommand priceCommand = new SqlCommand("SELECT Price FROM GamePoints WHERE PointType = @PointType", connection))
+                        {
+                            priceCommand.Parameters.AddWithValue("@PointType", pointType);
+
+                            using (SqlDataReader reader = priceCommand.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    price = reader.GetDecimal(0);  // Puan fiyatını alıyoruz
+                                }
+                                else
+                                {
+                                    MessageBox.Show($"Puan türü için fiyat bulunamadı: {pointType}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                            }
+                        }
+
+                        // Adet ve fiyatı çarpıyoruz
+                        decimal itemTotalPrice = price * quantity;
+                        totalPrice += itemTotalPrice;  // Toplam fiyatı biriktiriyoruz
+                    }
+
+                    // Toplam fiyatı karşılaştırıyoruz
                     if (userBalance < totalPrice)
                     {
                         MessageBox.Show("Yeterli bakiyeniz yok. Lütfen bakiye yükleyin.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
 
+                    // Ödeme işlemi ve bakiye güncellemesi
                     foreach (ListViewItem item in listView2.Items)
                     {
                         string gameName = item.SubItems[0].Text;
-                        string pointType = new string(item.SubItems[1].Text.Where(char.IsLetter).ToArray());
-                        int quantity = int.Parse(new string(item.SubItems[1].Text.Where(char.IsDigit).ToArray()));
-                        decimal price = decimal.Parse(item.SubItems[2].Text);
+                        string pointType = item.SubItems[1].Text; // Puan türünü alıyoruz
+                        int quantity = int.Parse(new string(item.SubItems[2].Text.Where(char.IsDigit).ToArray())); // Adet sayısını alıyoruz
+                        decimal price = 0;
+
+                        // Puan fiyatını alıyoruz
+                        using (SqlCommand priceCommand = new SqlCommand("SELECT Price FROM GamePoints WHERE PointType = @PointType", connection))
+                        {
+                            priceCommand.Parameters.AddWithValue("@PointType", pointType);
+
+                            using (SqlDataReader reader = priceCommand.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    price = reader.GetDecimal(0);  // Puan fiyatını alıyoruz
+                                }
+                                else
+                                {
+                                    MessageBox.Show($"Puan türü için fiyat bulunamadı: {pointType}", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                            }
+                        }
+
                         decimal itemTotalPrice = price * quantity;
 
+                        // Veritabanına sipariş bilgilerini ekliyoruz
                         using (SqlCommand insertCommand = new SqlCommand(
                             "INSERT INTO GamePoints_Sales (GameName, PointType, Quantity, Price, TotalPrice, UserID, PaymentMethod) " +
                             "VALUES (@GameName, @PointType, @Quantity, @Price, @TotalPrice, @UserID, @PaymentMethod)",
@@ -245,6 +288,7 @@ namespace InternetCafeManagement
                         }
                     }
 
+                    // Kullanıcı bakiyesini güncelliyoruz
                     using (SqlCommand updateBalanceCommand = new SqlCommand(
                         "UPDATE Users SET Balance = Balance - @TotalPrice WHERE user_id = @UserID",
                         connection))
@@ -261,6 +305,7 @@ namespace InternetCafeManagement
                 listView2.Items.Clear();
             }
         }
+
 
 
 
@@ -331,6 +376,30 @@ namespace InternetCafeManagement
         private void GamePoints_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Ana Sayfaya Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                AnaSayfa anaSayfa = new AnaSayfa();
+                anaSayfa.user_role = this.user_role;
+                anaSayfa.user_balance = this.user_balance;
+                anaSayfa.user_mail = this.user_mail;
+
+                anaSayfa.Show();
+                this.Hide();
+            }
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
         }
     }
 }

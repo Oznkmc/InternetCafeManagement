@@ -244,6 +244,12 @@
     <Compile Include="GamePoints.Designer.cs">
       <DependentUpon>GamePoints.cs</DependentUpon>
     </Compile>
+    <Compile Include="GamePointsSalesInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GamePointsSalesInfo.Designer.cs">
+      <DependentUpon>GamePointsSalesInfo.cs</DependentUpon>
+    </Compile>
     <Compile Include="MailGir.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -356,6 +362,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GamePoints.resx">
       <DependentUpon>GamePoints.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GamePointsSalesInfo.resx">
+      <DependentUpon>GamePointsSalesInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MailGir.resx">
       <DependentUpon>MailGir.cs</DependentUpon>

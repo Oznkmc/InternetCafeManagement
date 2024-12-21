@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace InternetCafeManagement
 {
@@ -441,16 +443,19 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Anasayfaya Dönüyorsun. Emin Misin?", "Geri Dön", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show("Admin Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
-                AnaSayfa ana = new AnaSayfa
+                admin Admin = new admin
                 {
-                    user_mail = user_mail,
-                    user_role = user_role
+                    role = this.user_role,
+                    usermail = this.user_mail,
+                    balance = this.user_balance,
+                    
                 };
-                ana.Show();
+
                 this.Hide();
+                Admin.Show(); // Admin formunu göster
             }
         }
 
@@ -461,6 +466,56 @@ namespace InternetCafeManagement
             {
                 Application.Exit();
             }
+        }
+
+        private void GetUserInfoByEmail(string email)
+        {
+            con = new SqlConnection(connectionString);
+
+            // Email ile users tablosundan kullanıcı bilgilerini getiren sorgu
+            SqlCommand command = new SqlCommand(
+                "SELECT * FROM users WHERE email = @Email", con
+            );
+            command.Parameters.AddWithValue("@Email", email);
+
+            da = new SqlDataAdapter(command);
+            ds = new DataSet();
+
+            try
+            {
+                con.Open();
+                da.Fill(ds, "users");
+
+                // DataGridView'e verileri aktarma
+                if (ds.Tables["users"].Rows.Count > 0)
+                {
+                    dataGridView1.DataSource = ds.Tables["users"];
+                }
+                else
+                {
+                    MessageBox.Show("Emaile ait kullanıcı bulunamadı.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Veri çekilirken bir hata oluştu: " + ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(txtMail.Text))
+            {
+                GetUserInfoByEmail(txtMail.Text);
+            }
+            else
+            {
+                griddoldur();
+            }
+            
         }
     }
 }

@@ -17,37 +17,59 @@ namespace InternetCafeManagement
         {
             InitializeComponent();
         }
-        public string user_mail {  get; set; }
-        public int secili_oturum {  get; set; }
+        public string user_mail { get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
         SqlConnection con = new SqlConnection();
         SqlDataAdapter da = new SqlDataAdapter();
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
+
         void griddoldur()
         {
-
             con = new SqlConnection(connectionString);
-            SqlCommand OrderPrice = new SqlCommand(
-    "SELECT TOP 1 o.TotalAmount AS TotalAmount " +
-    "FROM Orders o " +
-    "INNER JOIN sessions s ON o.SessionID = s.session_id " +
-    "INNER JOIN users u ON o.CustomerID = u.user_id " +
-    "WHERE u.user_id = @UserID " +
-    "AND s.session_id = @session_id " +
-    "AND s.start_time = (SELECT MAX(start_time) FROM sessions WHERE session_id = o.SessionID) " +
-    "ORDER BY s.start_time DESC;",
-    con
-);
-            OrderPrice.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
-            OrderPrice.Parameters.AddWithValue("@session_id", secili_oturum);
-            SqlDataAdapter da =new SqlDataAdapter(OrderPrice);
-            ds = new DataSet();
+
+            // Aktif oturumun session_id değerini almak için sorgu
+            // Aktif oturumun session_id değerini almak için sorgu
+            SqlCommand activeSessionQuery = new SqlCommand(
+                "SELECT TOP 1 session_id FROM sessions WHERE user_id = @UserID AND status =1 ORDER BY start_time DESC", con
+            );
+
+            activeSessionQuery.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
+
             con.Open();
-            da.Fill(ds, "Orders");
-            dataGridView1.DataSource = ds.Tables["Orders"];
+            object sessionIdObj = activeSessionQuery.ExecuteScalar();
             con.Close();
+
+            if (sessionIdObj != null)
+            {
+                int activeSessionId = Convert.ToInt32(sessionIdObj);
+
+                // Aktif oturum ile ilgili siparişleri çekmek için sorgu
+                SqlCommand orderQuery = new SqlCommand(
+                    "SELECT o.TotalAmount, o.OrderDate " +
+                    "FROM Orders o " +
+                    "INNER JOIN sessions s ON o.SessionID = s.session_id " +
+                    "INNER JOIN users u ON o.CustomerID = u.user_id " +
+                    "WHERE s.session_id = @session_id " +
+                    "ORDER BY s.start_time DESC;", con
+                );
+
+                orderQuery.Parameters.AddWithValue("@session_id", activeSessionId);
+
+                // Sipariş verilerini çek ve DataGridView'e aktar
+                da = new SqlDataAdapter(orderQuery);
+                ds = new DataSet();
+                con.Open();
+                da.Fill(ds, "Orders");
+                dataGridView1.DataSource = ds.Tables["Orders"];
+                con.Close();
+            }
+            else
+            {
+                MessageBox.Show("Aktif oturum bulunamadı.");
+            }
         }
+
         private int GetUserId(string email)
         {
             try
@@ -68,10 +90,12 @@ namespace InternetCafeManagement
                 return 0;
             }
         }
+
         private void ControlOrder_Load(object sender, EventArgs e)
         {
-           griddoldur();
+            griddoldur();
         }
+
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
