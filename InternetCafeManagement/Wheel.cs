@@ -158,7 +158,7 @@ namespace InternetCafeManagement
             hediyeler.Clear(); // Eğer sürekli ekleme yapılıyorsa listeyi temizleyin
             hediyeler.Add("1 saat ücretsiz oturum");
             hediyeler.Add("3 saat ücretsiz oturum");
-            hediyeler.Add("1 ay ücretsiz oturum");
+           
             hediyeler.Add("Oyuncu Klavyesi");
             hediyeler.Add("Bluetooth hoparlörler");
             hediyeler.Add("Oyuncu kulaklığı");
@@ -166,8 +166,7 @@ namespace InternetCafeManagement
             hediyeler.Add("Mousepad");
             hediyeler.Add("USB bellek");
             hediyeler.Add("Ülker çikolatalı gofret");
-            hediyeler.Add("200 liralık içecek hakkı");
-            hediyeler.Add("200 liralık atıştırmalık hakkı");
+           
             hediyeler.Add("Beypazarı Soda");
             hediyeler.Add("Kutu Kola");
             hediyeler.Add("1000 VP");

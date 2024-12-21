@@ -169,5 +169,27 @@ namespace InternetCafeManagement
                 textBox2.UseSystemPasswordChar = true;
             }
         }
+
+        private void pictureBox6_Click(object sender, EventArgs e)
+        {
+            ÜyeGirisPaneli üyeGirisPaneli = new ÜyeGirisPaneli();
+            DialogResult result = MessageBox.Show("Üye Giriş Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+
+
+                this.Hide();
+                üyeGirisPaneli.Show(); // Admin formunu göster
+            }
+        }
+
+        private void pictureBox7_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
+        }
     }
 }

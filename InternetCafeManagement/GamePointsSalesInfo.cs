@@ -145,16 +145,35 @@ namespace InternetCafeManagement
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            int userId = GetUserId(textBox1.Text);
 
-            if (userId > 0)
+            //int userId = GetUserId(textBox1.Text);
+
+            //if (userId > 0)
+            //{
+            //    // user_id ile GamePoints_Sales tablosundan veri çekme
+            //    GetGamePointsData(userId);
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Kullanıcı ID bulunamadı.");
+            //}
+            string email = textBox1.Text;  // TextBox1'den email alınır
+
+            if (!string.IsNullOrEmpty(email))
             {
-                // user_id ile GamePoints_Sales tablosundan veri çekme
-                GetGamePointsData(userId);
+                int userId = GetUserId(email); // Email'e göre user_id al
+                if (userId > 0)
+                {
+                    GetGamePointsData(userId); // user_id'ye göre siparişleri al
+                }
+                else
+                {
+                    MessageBox.Show("Email'e ait kullanıcı bulunamadı.");
+                }
             }
             else
             {
-                MessageBox.Show("Kullanıcı ID bulunamadı.");
+                GetAllGamePointsData();
             }
         }
     }

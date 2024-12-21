@@ -102,7 +102,15 @@ namespace InternetCafeManagement
 
         private void button1_Click(object sender, EventArgs e)
         {
+            ÜyeGirisPaneli üyeGirisPaneli = new ÜyeGirisPaneli();
+            DialogResult result = MessageBox.Show("Üye Giriş Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
 
+
+                this.Hide();
+                üyeGirisPaneli.Show(); // Admin formunu göster
+            }
         }
     }
 }

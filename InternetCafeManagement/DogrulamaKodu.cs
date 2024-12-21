@@ -25,26 +25,10 @@ namespace InternetCafeManagement
      
         private void DogrulamaKodu_Load(object sender, EventArgs e)
         {
-            timer1.Interval = 1000;
-            timer1.Start();
+            
         }
         private int secondsRemaining = 180;
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            secondsRemaining--;
-            if (secondsRemaining <= 0)
-            {
-                timer1.Stop();  // Timer'ı durdur
-                MessageBox.Show("Zaman Doldu!");
-            }
-            else
-            {
-                // Kalan süreyi dakika:saniye formatında göster
-                int minutes = secondsRemaining / 60;
-                int seconds = secondsRemaining % 60;
-                label2.Text = $"{minutes:D2}:{seconds:D2}";  // Zaman formatını "mm:ss" olarak güncelle
-            }
-        }
+     
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -61,6 +45,34 @@ namespace InternetCafeManagement
             else
             {
                 MessageBox.Show("Geçersiz kod. Lütfen tekrar deneyin.");
+            }
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox6_Click(object sender, EventArgs e)
+        {
+            ÜyeGirisPaneli üyeGirisPaneli = new ÜyeGirisPaneli();
+            DialogResult result = MessageBox.Show("Üye Giriş Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+
+
+                this.Hide();
+                üyeGirisPaneli.Show(); // Admin formunu göster
+            }
+        }
+
+        private void pictureBox7_Click(object sender, EventArgs e)
+        {
+
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
             }
         }
     }

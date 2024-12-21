@@ -257,7 +257,7 @@ namespace InternetCafeManagement
             if (saniye + (dakika * 60) + (saat * 3600) >= oturum_suresi)
             {
                 timer1.Stop();  // Zamanlayıcıyı durdur
-                DialogResult resultAna = MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor... Ana Sayfaya Yönlendirilmek İster Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                DialogResult resultAna = MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor... Ana Sayfaya mı, Oturum Sayfasına mı Yönlendirilmek İstersiniz?", "Uygulama Çıkışı", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
                 if (resultAna == DialogResult.Yes)
                 {
                     AnaSayfa ana = new AnaSayfa
@@ -268,12 +268,26 @@ namespace InternetCafeManagement
                     };
                     ana.Show();
                     this.Hide();
+                    FinalizeSession();  // Oturumu sonlandır
+                }
+                else if(resultAna==DialogResult.No)
+                {
+
+                    Sessions sessions = new Sessions();
+                    sessions.user_balance = user_balance;
+                    sessions.user_role = user_role;
+                    sessions.user_mail = user_mail;
+
+                    sessions.Show();
+                    this.Hide();
+                    FinalizeSession();  // Oturumu sonlandır
                 }
                 else
                 {
+                    FinalizeSession();  // Oturumu sonlandır
                     Application.Exit();
                 }
-                FinalizeSession();  // Oturumu sonlandır
+               
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     try
