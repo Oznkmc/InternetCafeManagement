@@ -79,7 +79,7 @@
             this.groupBox1.Size = new System.Drawing.Size(220, 419);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "groupBox1";
+            this.groupBox1.Text = "Kategoriler";
             // 
             // pictureBox2
             // 
@@ -224,7 +224,7 @@
             this.button12.Font = new System.Drawing.Font("Microsoft Sans Serif", 19.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.button12.Location = new System.Drawing.Point(840, 546);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(136, 81);
+            this.button12.Size = new System.Drawing.Size(146, 81);
             this.button12.TabIndex = 40;
             this.button12.Text = "Siparis";
             this.button12.UseVisualStyleBackColor = false;

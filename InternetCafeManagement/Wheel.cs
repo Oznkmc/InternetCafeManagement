@@ -41,22 +41,22 @@ namespace InternetCafeManagement
                 if(resultID!=null)
                 {
                     userid = (int)resultID;
-                    SqlCommand cmd = new SqlCommand("update gift_wheel SET reward=@reward, gift_duration=@gift_duration,is_claimed=0 where user_id=@userid", connection);
+                    SqlCommand cmd = new SqlCommand("update gift_wheel SET reward=@reward, gift_duration=@gift_duration,is_claimed=0,used_time=0 where user_id=@userid", connection);
                     cmd.Parameters.AddWithValue("@reward", reward);
                     cmd.Parameters.AddWithValue("@userid", userid);
                     if (reward == "1 saat ücretsiz oturum")
                     {
-                        cmd.Parameters.AddWithValue("@gift_duration", 60);
+                        cmd.Parameters.AddWithValue("@gift_duration", 1); //1 dkaikalık ayarladım
                         cmd.ExecuteNonQuery();
                     }
                     else if (reward == "3 saat ücretsiz oturum")
                     {
-                        cmd.Parameters.AddWithValue("@gift_duration", 180);
+                        cmd.Parameters.AddWithValue("@gift_duration", 3); // 3 dakikalık ayarladım
                         cmd.ExecuteNonQuery();
                     }
                     else
                     {
-                        SqlCommand cmd2 = new SqlCommand("update gift_wheel SET reward=@reward,is_claimed=0 where user_id=@userid", connection);
+                        SqlCommand cmd2 = new SqlCommand("update gift_wheel SET reward=@reward,is_claimed=0,used_time=0 where user_id=@userid", connection);
                         cmd2.Parameters.AddWithValue("userid", userid);
                         cmd2.Parameters.AddWithValue("@reward", reward);
                         cmd2.ExecuteNonQuery();
@@ -199,19 +199,27 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
+            DialogResult result = MessageBox.Show("Ana Sayfaya Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                AnaSayfa anaSayfa = new AnaSayfa();
+                anaSayfa.user_role = user_rol;
+                anaSayfa.user_balance = this.user_balance;
+                anaSayfa.user_mail = this.usermail;
 
-
-            AnaSayfa ana = new AnaSayfa();
-            ana.user_mail = usermail;
-            ana.user_balance = user_balance;
-            ana.user_role = user_rol;
-            ana.Show();
-            this.Hide();
+                anaSayfa.Show();
+                this.Hide();
+            }
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+
+            DialogResult result = MessageBox.Show("Uygulamadan Çıkıyorsun. Emin Misin?", "Bilgi", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (result == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
 
         }
     }

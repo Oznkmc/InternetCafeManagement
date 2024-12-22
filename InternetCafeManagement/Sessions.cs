@@ -183,7 +183,7 @@ namespace InternetCafeManagement
                                             addSession.Parameters.AddWithValue("@ComputerId", GetComputerId(pcsec));
 
                                             addSession.Parameters.AddWithValue("@StartTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-
+                                            
                                             addSession.ExecuteNonQuery();
                                         }
                                         catch (Exception ex)

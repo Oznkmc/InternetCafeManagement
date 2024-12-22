@@ -171,7 +171,7 @@ namespace InternetCafeManagement
             }
             else
             {
-                MessageBox.Show("Lütfen bir email giriniz.");
+                griddoldur();
             }
         }
     }
