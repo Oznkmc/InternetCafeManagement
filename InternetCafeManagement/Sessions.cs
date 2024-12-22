@@ -153,7 +153,7 @@ namespace InternetCafeManagement
 
                     if (reward == "1 saat ücretsiz oturum" || reward == "3 saat ücretsiz oturum")
                     {
-                        DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
                         if (result2 == DialogResult.Yes)
                         {
@@ -223,6 +223,23 @@ namespace InternetCafeManagement
 
 
                         }
+                        else if(result2==DialogResult.No)
+                        {
+
+                            CustomInputSession customInputSession = new CustomInputSession
+                            {
+                                user_role = this.user_role,
+                                user_mail = this.user_mail,
+                                user_balance = this.user_balance,
+                                secili_pc = pcsec,
+                                hediyekullandi = false
+                            };
+
+                            customInputSession.Show();
+                            this.Hide();
+
+                        }
+
                     }
                     else
                     {
@@ -240,6 +257,7 @@ namespace InternetCafeManagement
                         this.Hide();
 
                     }
+
                 }
             }
             catch (Exception ex)

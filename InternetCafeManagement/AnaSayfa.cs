@@ -192,24 +192,54 @@ namespace InternetCafeManagement
                         this.Hide();
                         return;
                     }
-
-                    // Sadece kullanılabilir bir hediye varsa onay sor
-                    DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                    if (result2 == DialogResult.Yes)
+                    if (reward == "1000 VP" || reward == " 2050 VP" || reward == "5350 VP" || reward == "2800 RP" || reward == "5000 RP" || reward == "7200 RP")
                     {
-                        // Hediye kullanımı
-                        secilihediye = reward;
-                        SqlCommand command = new SqlCommand("UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserId", connection);
-                        command.Parameters.AddWithValue("@UserId", userId);
-                        int row = command.ExecuteNonQuery();
 
-                        if (row == 0)
+
+                        // Sadece kullanılabilir bir hediye varsa onay sor
+                        DialogResult result2 = MessageBox.Show($"Bir Hediyeniz Var ({reward}). Kullanmak İster Misiniz?", "Onay", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                        if (result2 == DialogResult.Yes)
                         {
-                            MessageBox.Show("Başarısız Güncelleme", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
+                            // Hediye kullanımı
+                            secilihediye = reward;
+                            SqlCommand command = new SqlCommand("UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserId", connection);
+                            command.Parameters.AddWithValue("@UserId", userId);
+                            int row = command.ExecuteNonQuery();
 
+                            if (row == 0)
+                            {
+                                MessageBox.Show("Başarısız Güncelleme", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
+
+                            GamePoints points = new GamePoints
+                            {
+                                user_balance = user_balance,
+                                user_mail = user_mail,
+                                user_role = user_role,
+                                hediyekullandi = true,
+                                secilihediye = secilihediye
+                            };
+                            points.Show();
+                            this.Hide();
+                        }
+                        else if (result2 == DialogResult.No)
+                        {
+                            // Hediye kullanmama
+                            GamePoints points = new GamePoints
+                            {
+                                user_balance = user_balance,
+                                user_mail = user_mail,
+                                user_role = user_role,
+                                hediyekullandi = false
+                            };
+                            points.Show();
+                            this.Hide();
+                        }
+                    }
+                    else
+                    {
                         GamePoints points = new GamePoints
                         {
                             user_balance = user_balance,
@@ -217,19 +247,6 @@ namespace InternetCafeManagement
                             user_role = user_role,
                             hediyekullandi = true,
                             secilihediye = secilihediye
-                        };
-                        points.Show();
-                        this.Hide();
-                    }
-                    else
-                    {
-                        // Hediye kullanmama
-                        GamePoints points = new GamePoints
-                        {
-                            user_balance = user_balance,
-                            user_mail = user_mail,
-                            user_role = user_role,
-                            hediyekullandi = false
                         };
                         points.Show();
                         this.Hide();

@@ -54,7 +54,7 @@ namespace InternetCafeManagement
 
             try
             {
-                string startTimeString = start_time.ToString("yyyy-MM-dd HH:mm:ss");
+               
                 string endTimeString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
@@ -78,47 +78,84 @@ namespace InternetCafeManagement
                     object computerIdResult = computerIdCommand.ExecuteScalar();
                     int computerId = computerIdResult != DBNull.Value ? Convert.ToInt32(computerIdResult) : 0;
 
-                    // Oturum bilgilerini kaydet
-                    //SqlCommand saveSession = new SqlCommand(
-                    //    "INSERT INTO sessions (user_id, computer_id, total_price, start_time, end_time) " +
-                    //    "VALUES (@UserId, @ComputerId, @TotalPrice, @StartTime, @EndTime)", connection);
-                    //saveSession.Parameters.AddWithValue("@UserId", userId);
-                    //saveSession.Parameters.AddWithValue("@ComputerId", computerId);
-                    //saveSession.Parameters.AddWithValue("@TotalPrice", sessionBalance);
-                    //saveSession.Parameters.AddWithValue("@StartTime", startTimeString);
-                    //saveSession.Parameters.AddWithValue("@EndTime", endTimeString);
-                    //saveSession.ExecuteNonQuery();
+                    // Hediye sürelerini kontrol et ve işlemleri yap
+                    int giftDuration = 0;
+                    int previouslyUsedTime = 0;
+                    bool isGiftClaimed = false;
 
-                    SqlCommand SessionID = new SqlCommand("SELECT session_id FROM sessions WHERE user_id=@GetUserID AND status=1", connection);
-                    SessionID.Parameters.AddWithValue("@GetUserID", GetUserId(user_mail));
-                    object result7 = SessionID.ExecuteScalar();
+                    SqlCommand giftQuery = new SqlCommand(
+                        "SELECT gift_duration, used_time, is_claimed FROM gift_wheel WHERE user_id = @UserID AND is_claimed = 0", connection);
+                    giftQuery.Parameters.AddWithValue("@UserID", userId);
 
-                    if (result7 != null && int.TryParse(result7.ToString(), out int SessionIDgetir))
+                    SqlDataReader reader = giftQuery.ExecuteReader();
+                    if (reader.Read())
                     {
-                        SqlCommand UpdateSession = new SqlCommand(
-                            "UPDATE sessions SET total_price=TotalPrice, end_time=@EndDate,status=0 WHERE session_id=@SessionID", connection);
-                        UpdateSession.Parameters.AddWithValue("@TotalPrice", totalprice);
-                        UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                        UpdateSession.Parameters.AddWithValue("@SessionID", SessionIDgetir);
+                        giftDuration = reader["gift_duration"] != DBNull.Value ? Convert.ToInt32(reader["gift_duration"]) : 0;
+                        previouslyUsedTime = reader["used_time"] != DBNull.Value ? Convert.ToInt32(reader["used_time"]) : 0;
+                        isGiftClaimed = reader["is_claimed"] != DBNull.Value ? Convert.ToBoolean(reader["is_claimed"]) : false;
+                        reader.Close();
 
-                        int row = UpdateSession.ExecuteNonQuery();
-                        if (row > 0)
+                        int remainingGiftTime = giftDuration - previouslyUsedTime;
+
+                        if (!isGiftClaimed && remainingGiftTime > 0)
                         {
-                            MessageBox.Show("Oturum Başarıyla Güncellenmiştir. Bir Daha Bekleriz.");
+                            int newUsedTime = previouslyUsedTime + (saniye / 60);
+
+                            if (newUsedTime <= giftDuration)
+                            {
+                                SqlCommand updateGift = new SqlCommand(
+                                    "UPDATE gift_wheel SET used_time = @UsedTime WHERE user_id = @UserID AND is_claimed = 0", connection);
+                                updateGift.Parameters.AddWithValue("@UsedTime", newUsedTime);
+                                updateGift.Parameters.AddWithValue("@UserID", userId);
+                                updateGift.ExecuteNonQuery();
+                            }
+                            else
+                            {
+                                SqlCommand claimGift = new SqlCommand(
+                                    "UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserID", connection);
+                                claimGift.Parameters.AddWithValue("@UserID", userId);
+                                claimGift.ExecuteNonQuery();
+                            }
                         }
                         else
                         {
-                            MessageBox.Show("Oturum güncellenemedi. Lütfen kayıtları kontrol edin.");
+                            MessageBox.Show("Hediye süreniz tamamlanmıştır.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
                     else
                     {
-                        MessageBox.Show("Geçerli bir oturum bulunamadı.");
+                        reader.Close();
+                        MessageBox.Show("Geçerli bir hediye bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
+                    // Oturum bilgilerini güncelle veya yeni oturum kaydı yap
+                    SqlCommand sessionIdCommand = new SqlCommand(
+                        "SELECT session_id FROM sessions WHERE status = 1 AND computer_id = @ComputerID", connection);
+                    sessionIdCommand.Parameters.AddWithValue("@ComputerID", computerId);
+                    
+                    object sessionIdResult = sessionIdCommand.ExecuteScalar();
+
+                    if (sessionIdResult != null)
+                    {
+                        int sessionId = (int)sessionIdResult;
+                        SqlCommand updateSession = new SqlCommand(
+                            "UPDATE sessions SET end_time = @EndDate, status = 0,total_price=@Price WHERE session_id = @SessionID", connection);
+                        updateSession.Parameters.AddWithValue("@EndDate", endTimeString);
+                        updateSession.Parameters.AddWithValue("@SessionID", sessionId);
+                        updateSession.Parameters.AddWithValue("@Price", Convert.ToDecimal(totalprice));
+                       int row2= updateSession.ExecuteNonQuery();
+                        if (row2 != 0)
+                        {
+                            MessageBox.Show("Oturum başarıyla kapatıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Aktif bir oturum bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
 
                     // Kullanıcıya bilgi mesajı
-                    MessageBox.Show("Oturum başarıyla kapatıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    
 
                     // Uygulamayı kapat veya anasayfaya dön
                     if (uygulamayiKapat)
@@ -138,11 +175,16 @@ namespace InternetCafeManagement
                     }
                 }
             }
+            catch (SqlException sqlEx)
+            {
+                MessageBox.Show("Veritabanı hatası: " + sqlEx.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             catch (Exception ex)
             {
                 MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
@@ -203,7 +245,15 @@ namespace InternetCafeManagement
                 double giftDuration = giftDurationResult != DBNull.Value ? Convert.ToDouble(giftDurationResult) : 0;
 
                 // Kalan süreyi hesapla
-                label4.Text = "Kalan Süresi: " + giftDuration.ToString() + " dakika"; // Burada kalan süreyi ekrana yazdırabilirsiniz
+                if(hediyekullandi)
+                {
+                    label4.Text = "Kalan Süresi: " + oturum_suresi.ToString() + " dakika"; // Burada kalan süreyi ekrana yazdırabilirsiniz
+                }
+                else
+                {
+                    label4.Text = "Kalan Süresi: " + oturum_suresi.ToString() + " dakika"; // Burada kalan süreyi ekrana yazdırabilirsiniz
+                }
+                
             }
 
 
@@ -257,7 +307,7 @@ namespace InternetCafeManagement
             if (saniye + (dakika * 60) + (saat * 3600) >= oturum_suresi)
             {
                 timer1.Stop();  // Zamanlayıcıyı durdur
-                DialogResult resultAna = MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor... Ana Sayfaya mı, Oturum Sayfasına mı Yönlendirilmek İstersiniz?", "Uygulama Çıkışı", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                DialogResult resultAna = MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor... Ana Sayfaya mı, Oturum Sayfasına mı Yönlendirilmek İstersiniz?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (resultAna == DialogResult.Yes)
                 {
                     AnaSayfa ana = new AnaSayfa
@@ -268,9 +318,9 @@ namespace InternetCafeManagement
                     };
                     ana.Show();
                     this.Hide();
-                    FinalizeSession();  // Oturumu sonlandır
+                    OturumuKapat(false); // Oturumu sonlandır
                 }
-                else if(resultAna==DialogResult.No)
+                else if (resultAna==DialogResult.No)
                 {
 
                     Sessions sessions = new Sessions();
@@ -280,13 +330,9 @@ namespace InternetCafeManagement
 
                     sessions.Show();
                     this.Hide();
-                    FinalizeSession();  // Oturumu sonlandır
+                    OturumuKapat(true); // Oturumu sonlandır
                 }
-                else
-                {
-                    FinalizeSession();  // Oturumu sonlandır
-                    Application.Exit();
-                }
+               
                
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
@@ -506,6 +552,7 @@ namespace InternetCafeManagement
                 user_role = user_role,
                 oturum_suresi = lasttime,
                 session_balance = this.sessionBalance,
+                secili_pc = secili_pc
             };
 
             add.Show();
@@ -535,197 +582,18 @@ namespace InternetCafeManagement
             //{
             //    MessageBox.Show("Oturum kapatılırken bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             //}
-            int usedTime = saniye; // Kullanılan süre (saniye cinsinden)
-            int remainingTime = 0; // Kalan süre
-            int giftDuration = 0;
-            int previouslyUsedTime = 0;
-            bool isGiftClaimed = false;
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    // Kullanıcının hediye bilgilerini al
-                    SqlCommand giftQuery = new SqlCommand(
-                        "SELECT gift_duration, used_time, is_claimed FROM gift_wheel WHERE user_id = @UserID AND is_claimed = 0", connection);
-                    giftQuery.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
-
-                    SqlDataReader reader = giftQuery.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        giftDuration = reader["gift_duration"] != DBNull.Value ? Convert.ToInt32(reader["gift_duration"]) : 0;
-                        previouslyUsedTime = reader["used_time"] != DBNull.Value ? Convert.ToInt32(reader["used_time"]) : 0;
-                        isGiftClaimed = reader["is_claimed"] != DBNull.Value ? Convert.ToBoolean(reader["is_claimed"]) : false;
-                        reader.Close();
-
-                        // Eğer hediye kullanıldıysa balance işlemi yapılacak, hediye süresi geçerli değil
-                        if (isGiftClaimed)
-                        {
-                            MessageBox.Show("Hediyeniz zaten kullanıldı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                        else
-                        {
-                            // Kalan süreyi hesaplayalım
-                            int remainingGiftTime = giftDuration - previouslyUsedTime; // Kalan süre (hediye süresi - kullanılan süre)
-
-                            if (remainingGiftTime > 0)
-                            {
-                                // Hediye süresi hala geçerli ve kullanılabilir durumda
-                                int newUsedTime = previouslyUsedTime + (usedTime / 60); // Kullanılan süreyi dakikaya çevirerek ekliyoruz
-
-                                if (newUsedTime <= giftDuration)
-                                {
-                                    // Güncellenmiş used_time'ı kaydediyoruz
-                                    SqlCommand updateGift = new SqlCommand(
-                                        "UPDATE gift_wheel SET used_time = @UsedTime WHERE user_id = @UserID AND is_claimed = 0", connection);
-                                    updateGift.Parameters.AddWithValue("@UsedTime", newUsedTime); // Yeni used_time değerini güncelle
-                                    updateGift.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
-                                    updateGift.ExecuteNonQuery();
-                                }
-                                else
-                                {
-                                    MessageBox.Show("Hediye süreniz tamamlanmıştır.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                }
-                            }
-                            else
-                            {
-                                // Hediye süresi bitmişse, 'is_claimed' durumunu güncelle
-                                SqlCommand claimGift = new SqlCommand(
-                                    "UPDATE gift_wheel SET is_claimed = 1 WHERE user_id = @UserID", connection);
-                                claimGift.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
-                                claimGift.ExecuteNonQuery();
-
-                                MessageBox.Show("Hediye süreniz tamamlanmıştır. Yeni bir oturum açabilirsiniz.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        reader.Close();
-                        // Eğer hediye yoksa, balance güncellenecek
-
-                        SqlCommand sessionidgetir = new SqlCommand(
-        "SELECT session_id FROM sessions WHERE status = 1 AND computer_id = @ComputerID",
-        connection
-    );
-                        sessionidgetir.Parameters.AddWithValue("@ComputerID", GetComputerId(secili_pc));
-                        object resultSessionID = sessionidgetir.ExecuteScalar();
-
-                        if (resultSessionID != null)
-                        {
-                            int sessionid1 = (int)resultSessionID;
-                            secili_oturum = sessionid1;
-
-                            SqlCommand UpdateSession = new SqlCommand(
-                                "UPDATE sessions SET end_time = @EndDate, status = 0 WHERE session_id = @SessionID",
-                                connection
-                            );
-                            UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                            UpdateSession.Parameters.AddWithValue("@SessionID", sessionid1);
-
-                            int row = UpdateSession.ExecuteNonQuery();
-
-                            if (row > 0)
-                            {
-                                MessageBox.Show("Oturum başarıyla kapatıldı.", "Oturum Kapatıldı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-                            else
-                            {
-                                MessageBox.Show("Oturum kapatma sırasında bir hata oluştu.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show("Aktif bir oturum bulunamadı.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-
-
-
-
-                        SqlCommand SessionID = new SqlCommand("select session_id from sessions where user_id=@GetUserID  and status=1", connection);
-                        SessionID.Parameters.AddWithValue("@GetUserID", GetUserId(user_mail));
-                        object result7 = SessionID.ExecuteScalar();
-                        if (result7 != null)
-                        {
-                            int SessionIDgetir = (int)result7;
-                            //SqlCommand UpdateSession = new SqlCommand("Update sessions set total_price=total_price+@TotalPrice,end_time=@EndDate, status=0 where session_id=@SessionID", connection);
-                            //UpdateSession.Parameters.AddWithValue("@TotalPrice", Convert.ToDecimal(totalprice));
-                            //UpdateSession.Parameters.AddWithValue("@EndDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                            //UpdateSession.Parameters.AddWithValue("@SessionID", SessionIDgetir);
-                            //int row=UpdateSession.ExecuteNonQuery();
-                            //if (row != 0)
-                            //{
-
-                            // Hediye kullanıldıktan sonra 'used_time' güncelleniyor
-                            SqlCommand updateUsedTime = new SqlCommand("UPDATE gift_wheel SET used_time = ISNULL(used_time, 0) + @UsedTime, is_claimed = 1 WHERE user_id = @UserID", connection);
-                            updateUsedTime.Parameters.AddWithValue("@UsedTime", remainingTime); // Kalan süre kadar kullanılan süreyi ekle
-                            updateUsedTime.Parameters.AddWithValue("@UserID", GetUserId(user_mail));
-                            updateUsedTime.ExecuteNonQuery(); // Güncellemeyi yap
-                            MessageBox.Show("Oturum Başarıyla Güncellenmiştir.Bir Daha Bekleriz.");
-                            //}
-                        }
-
-
-
-
-
-
-
-
-
-
-
-
-                        // Bilgisayar durumunu güncelle
-                        SqlCommand updateComputerStatus = new SqlCommand(
-                            "UPDATE computers SET status = 'available' WHERE name = @ComputerName", connection);
-                        updateComputerStatus.Parameters.AddWithValue("@ComputerName", secili_pc);
-                        updateComputerStatus.ExecuteNonQuery();
-                    }
-
-                    // Oturum kapatma işlemi tamamlandıktan sonra ana menüye dön
-                    Sessions sessionsForm = new Sessions
-                    {
-                        user_role = this.user_role,
-                        user_mail = this.user_mail,
-                        user_balance = this.user_balance,
-                    };
-                    sessionsForm.Show();
-                    this.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            OturumuKapat(false);
         }
 
         private void pictureBox4_Click_1(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Anasayfaya Döneceksin.Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show("Anasayfaya dönmek oturumunuzu sonlandıracaktır. Emin misiniz?", "Anasayfaya Dönüş", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
 
-            try
+            if (result == DialogResult.Yes)
             {
-                // Oturum süresi dolmadan kapatma kontrolü
-                if (timer1.Enabled)
-                {
-                    timer1.Stop(); // Zamanlayıcıyı durdur
-                }
-
-                // FinalizeSession metodu ile oturum işlemlerini tamamla
-                FinalizeSession();
-
-                MessageBox.Show("Oturum başarıyla kapatıldı.", "Oturum Kapatıldı", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // Gerekirse başka işlemler yap
-                // Örneğin, kullanıcıyı ana ekrana yönlendirme
+                OturumuKapat(false); // Anasayfaya dön seçeneği ile oturumu kapat
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Oturum kapatılırken bir hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+
         }
 
         private void pictureBox11_Click(object sender, EventArgs e)

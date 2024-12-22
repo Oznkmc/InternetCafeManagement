@@ -50,16 +50,24 @@ namespace InternetCafeManagement
 
         private void pictureBox2_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Oturum formuna dönmek istediğinize emin misiniz?");
-            if (result == DialogResult.OK)
+            DialogResult result = MessageBox.Show("Oturum Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
             {
-                Sessions sessions = new Sessions();
-                sessions.user_role = user_role;
-                sessions.user_mail = user_mail;
-                sessions.user_balance = user_balance;
+                Sessions sessions = new Sessions
+                {
+                    user_mail = this.user_mail,
+                    user_balance = this.user_balance,
+                    user_role = this.user_role,
+
+                };
                 sessions.Show();
                 this.Hide();
             }
+
+
+
+
+
         }
 
         public int oturumSuresi;
@@ -259,7 +267,7 @@ namespace InternetCafeManagement
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            DialogResult result = MessageBox.Show("Oturum Sayfasına Dönüyorsun. Emin Misin?", "Geri Dön", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult result = MessageBox.Show("Oturum Sayfasına Dönüyorsun. Emin Misin?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
                 Sessions sessions = new Sessions
@@ -272,6 +280,12 @@ namespace InternetCafeManagement
                 sessions.Show();
                 this.Hide();
             }
+
+
+
+
+
+          
 
         }
 
