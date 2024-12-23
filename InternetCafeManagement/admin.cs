@@ -18,7 +18,7 @@ namespace InternetCafeManagement
         }
         public bool role {  get; set; }
         public string usermail {  get; set; }
-        public double balance {  get; set; }
+        public decimal balance {  get; set; }
 
 
         private void admin_Load(object sender, EventArgs e)
@@ -44,6 +44,7 @@ namespace InternetCafeManagement
             SessionInfo sessionInfo = new SessionInfo();
             sessionInfo.user_role = role;
             sessionInfo.user_mail = usermail;
+            sessionInfo.user_balance = balance;
             sessionInfo.Show();
             this.Hide();
 

@@ -269,6 +269,7 @@
             this.Controls.Add(this.txtKullanıcıID);
             this.Controls.Add(this.dataGridView1);
             this.Name = "WheelInfo";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "WheelInfo";
             this.Load += new System.EventHandler(this.WheelInfo_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();

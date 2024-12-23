@@ -20,7 +20,7 @@ namespace InternetCafeManagement
 
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
         public string usermail { get; set; }
-        public double userbalance {  get; set; }
+        public decimal userbalance {  get; set; }
         public bool userrole { get; set; }
         private void pictureBox1_Click(object sender, EventArgs e)
         {
@@ -61,7 +61,7 @@ namespace InternetCafeManagement
                         object result2 = balance.ExecuteScalar();
                         if (result2 != null && result2 != DBNull.Value)
                         {
-                            userbalance =Convert.ToDouble(result2); // Bakiyeyi güncelliyoruz
+                            userbalance =Convert.ToDecimal(result2); // Bakiyeyi güncelliyoruz
                         }
                         else
                         {

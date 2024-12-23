@@ -25,7 +25,7 @@ namespace InternetCafeManagement
         DataSet ds = new DataSet();
         public string usermail { get; set; }
         public bool user_role { get; set; }
-        public double user_balance {  get; set; }
+        public decimal user_balance {  get; set; }
         void griddoldur()
         {
 

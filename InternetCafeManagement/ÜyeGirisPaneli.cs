@@ -117,7 +117,7 @@ namespace InternetCafeManagement
         public string name;
         public bool role; // Kullanıcı rolü
         public string usermail; // Kullanıcı maili
-        public double userbalance; // Kullanıcı bakiyesi
+        public decimal userbalance; // Kullanıcı bakiyesi
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
@@ -152,7 +152,7 @@ namespace InternetCafeManagement
                         object result3 = balance.ExecuteScalar();
                         if (result3 != null && result3 != DBNull.Value)
                         {
-                            userbalance = Convert.ToDouble(result3); // Bakiyeyi güncelliyoruz
+                            userbalance = Convert.ToDecimal(result3); // Bakiyeyi güncelliyoruz
                         }
                         else
                         {
@@ -182,7 +182,7 @@ namespace InternetCafeManagement
                         ana.user_balance = userbalance; // Bakiye burada atanabilir
 
                         // Rol kontrolü: role false ise Ana Sayfa'daki pictureBox1 gizlenir
-                     
+                        
 
                         this.Hide();
                         ana.Show();

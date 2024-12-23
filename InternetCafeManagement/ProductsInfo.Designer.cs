@@ -206,6 +206,7 @@
             this.Controls.Add(this.txtUrunName);
             this.Controls.Add(this.dataGridView1);
             this.Name = "ProductsInfo";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ProductsInfo";
             this.Load += new System.EventHandler(this.ProductsInfo_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();

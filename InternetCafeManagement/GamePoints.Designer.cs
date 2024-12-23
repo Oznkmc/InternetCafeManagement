@@ -419,6 +419,7 @@
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "GamePoints";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "GamePoints";
             this.Load += new System.EventHandler(this.GamePoints_Load);
             this.groupBox1.ResumeLayout(false);

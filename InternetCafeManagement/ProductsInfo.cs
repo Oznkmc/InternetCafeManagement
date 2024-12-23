@@ -24,7 +24,7 @@ namespace InternetCafeManagement
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
         public bool user_role { get; set; }
-        public double user_balance {  get; set; }
+        public decimal user_balance {  get; set; }
         public string user_mail { get; set; }
         void griddoldur()
         {
@@ -242,7 +242,7 @@ namespace InternetCafeManagement
             {
                 admin Admin = new admin();
                 Admin.role = this.user_role;
-
+                Admin.balance = user_balance;
                 Admin.usermail = this.user_mail;
 
                 Admin.Show();

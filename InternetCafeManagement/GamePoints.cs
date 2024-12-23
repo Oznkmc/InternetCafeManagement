@@ -18,7 +18,7 @@ namespace InternetCafeManagement
             InitializeComponent();
         }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
-        public double user_balance { get; set; }
+        public decimal user_balance { get; set; }
         public string user_mail {  get; set; }
         public bool hediyekullandi {  get; set; }
         public string secilihediye {  get; set; }
@@ -175,6 +175,12 @@ namespace InternetCafeManagement
                     if (row1 > 0)
                     {
                         MessageBox.Show("Hediye kullanılarak sipariş tamamlandı!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        AnaSayfa anaSayfa = new AnaSayfa();
+                        anaSayfa.user_balance = user_balance;
+                        anaSayfa.user_mail  = user_mail;
+                        anaSayfa.user_role = user_role;
+                        anaSayfa.Show();
+                        this.Hide();
                     }
                 }
                 else

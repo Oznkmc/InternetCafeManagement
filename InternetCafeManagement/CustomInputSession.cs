@@ -20,7 +20,7 @@ namespace InternetCafeManagement
 
         public bool user_role { get; set; }
         public string user_mail { get; set; }
-        public double user_balance { get; set; }
+        public decimal user_balance { get; set; }
         public string secili_pc { get; set; }
         public bool hediyekullandi { get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
@@ -114,7 +114,7 @@ namespace InternetCafeManagement
             //sınırsız oturum
             if (inputText == "sınırsız")
             {
-                if (user_balance >= 7.5)
+                if (user_balance >= 7.5m) 
                 {
                     oturumSuresi = 99999;
                     DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -166,7 +166,7 @@ namespace InternetCafeManagement
             {
                 if (parsedOturumSuresi >= 0)
                 {
-                    double requiredBalance = parsedOturumSuresi * 0.25;
+                    decimal requiredBalance = Convert.ToDecimal(parsedOturumSuresi * 0.25);
                     if (user_balance >= requiredBalance)
                     {
                         DialogResult result = MessageBox.Show("Oturum Süresinden Emin Misiniz?", "Onay", MessageBoxButtons.YesNo, MessageBoxIcon.Question);

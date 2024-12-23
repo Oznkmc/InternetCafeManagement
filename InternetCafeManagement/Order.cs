@@ -19,7 +19,7 @@ namespace InternetCafeManagement
         {
             InitializeComponent();
         }
-        public double user_balance { get; set; }
+        public decimal user_balance { get; set; }
 
        
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
@@ -388,41 +388,80 @@ namespace InternetCafeManagement
                 decimal itemTotalPrice = quantity * price; // Adet x Birim Fiyat
                 totalPrice += itemTotalPrice;
             }
+            using (SqlConnection sqlConnection=new SqlConnection(connectionString))
+            {
+                try
+                {
+                    sqlConnection.Open();
+                    SqlCommand sqlCommand1 = new SqlCommand("select balance from users where user_id=@userID", sqlConnection);
+                    sqlCommand1.Parameters.AddWithValue("@userID", GetUserId(user_mail));
+                    object resultsqlcommand = sqlCommand1.ExecuteScalar();
+                    if (resultsqlcommand != null)
+                    {
+                        decimal balance = (decimal)resultsqlcommand;
+                        if (totalPrice > Convert.ToDecimal(balance))
+                        {
+                            MessageBox.Show("Hesap bakiyesi yetersiz.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            listView1.Items.Clear();
+                            listView2.Items.Clear();
+                            return;
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Hatanız:" + ex.Message);
+                }
+                finally
+                {
+                    sqlConnection.Close();
+                }
+               
+            }
+             
+
 
             // Kullanıcı bakiyesi kontrolü
-            if (totalPrice > Convert.ToDecimal(user_balance))
-            {
-                MessageBox.Show("Hesap bakiyesi yetersiz.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                listView1.Items.Clear();
-                listView2.Items.Clear();
-                return;
-            }
+          
 
             // Ödeme tipini soruyoruz
-            DialogResult result6 = MessageBox.Show("Ödeme Tipiniz Nakit Mi?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            string payment_method = result6 == DialogResult.Yes ? "Nakit" : "Banka Kartı";
-            int orderId;
-            // Siparişi veritabanına kaydediyoruz
-            if (UsersSessionActive)
+            DialogResult result6 = MessageBox.Show("Ödeme Tipiniz Nakit Mi?", "Uygulama Çıkışı", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+            if (result6 == DialogResult.Cancel)
             {
-               orderId = SaveOrderToDatabase(sessionidgetir, totalPrice, payment_method);
-                UpdateUserBalance();
+                // Kullanıcı vazgeçti, işlem yapılmıyor
+                MessageBox.Show("İşlem iptal edildi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                orderId = SaveOrderToDatabaseInActiveUsersSession(totalPrice, payment_method);
-                UpdateUserBalance();
+                // Kullanıcının seçimine göre ödeme tipi belirleniyor
+                string payment_method = result6 == DialogResult.Yes ? "Nakit" : "Banka Kartı";
+                int orderId;
 
+                if (UsersSessionActive)
+                {
+                    // Kullanıcı oturumu aktifken siparişi kaydet
+                    orderId = SaveOrderToDatabase(sessionidgetir, totalPrice, payment_method);
+                    MessageBox.Show("Sipariş başarıyla kaydedildi!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    UpdateUserBalance();
+                }
+                else
+                {
+                    // Kullanıcı oturumu aktif değilken siparişi kaydet
+                    orderId = SaveOrderToDatabaseInActiveUsersSession(totalPrice, payment_method);
+                    MessageBox.Show("Sipariş başarıyla kaydedildi!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    UpdateUserBalance();
+                }
             }
 
-           
+
 
             // Sipariş ekranını temizliyoruz
             listView1.Items.Clear();
             listView2.Items.Clear();
 
             // Kullanıcıya siparişin başarıyla kaydedildiği mesajını gösteriyoruz
-            MessageBox.Show("Sipariş başarıyla kaydedildi!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        
             
             Order order=new Order();
             order.Hide();

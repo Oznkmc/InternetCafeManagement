@@ -28,7 +28,7 @@ namespace InternetCafeManagement
         DataSet ds = new DataSet();
         public bool user_role { get; set; }
         public string user_mail { get; set; }
-        public double user_balance { get; set; }
+        public decimal user_balance { get; set; }
         void griddoldur()
         {
             con = new SqlConnection(connectionString);
@@ -47,12 +47,19 @@ namespace InternetCafeManagement
                 try
                 {
                     connection.Open();
-                    SqlCommand com = new SqlCommand("delete from users where email=@UserMail", connection);
-                    com.Parameters.AddWithValue("@UserMail", email);
-                    com.ExecuteNonQuery();
-                    MessageBox.Show("Kullanıcı Başarıyla Silinmiştir.");
-                    griddoldur();
-                    connection.Close();
+                    SqlCommand commandgift= new SqlCommand("delete from gift_wheel where user_id=@UserID",connection);
+                    commandgift.Parameters.AddWithValue("@UserID", GetUserId(txtMail.Text));
+                    int row=commandgift.ExecuteNonQuery();
+                    if (row > 0)
+                    {
+                        SqlCommand com = new SqlCommand("delete from users where email=@UserMail", connection);
+                        com.Parameters.AddWithValue("@UserMail", email);
+                        com.ExecuteNonQuery();
+                        MessageBox.Show("Kullanıcı Başarıyla Silinmiştir.");
+                        griddoldur();
+                        connection.Close();
+                    }
+                   
 
                 }
                 catch (Exception ex)
@@ -68,6 +75,26 @@ namespace InternetCafeManagement
             
            
             
+        }
+        private int GetUserId(string email)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("SELECT user_id FROM users WHERE email = @Email", connection);
+                    command.Parameters.AddWithValue("@Email", email);
+
+                    object userId = command.ExecuteScalar();
+                    return userId != null ? Convert.ToInt32(userId) : 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Kullanıcı ID alınırken bir hata oluştu: " + ex.Message);
+                return 0;
+            }
         }
         private void Users_Load(object sender, EventArgs e)
         {
@@ -371,6 +398,7 @@ namespace InternetCafeManagement
             using (SqlConnection connection=new SqlConnection(connectionString))
             {
                 connection.Open();
+                
                 SqlCommand user_id = new SqlCommand("select user_id from users where email=@UserMail", connection);
                 user_id.Parameters.AddWithValue("@UserMail", txtMail.Text);
                 object result = user_id.ExecuteScalar();
@@ -386,7 +414,7 @@ namespace InternetCafeManagement
                         UpdateUser.Parameters.AddWithValue("@password", txtPassword.Text);
                         UpdateUser.Parameters.AddWithValue("@email", txtMail.Text);
                         UpdateUser.Parameters.AddWithValue("@phonenumber", txtPhone.Text);
-                        UpdateUser.Parameters.AddWithValue("@balance", Convert.ToInt32(Balance.Text));
+                        UpdateUser.Parameters.AddWithValue("@balance", Convert.ToDecimal(Balance.Text));
                         UpdateUser.ExecuteNonQuery();
                         griddoldur();
                         MessageBox.Show("Kullanıcı Başarıyla Güncellenmiştir.");

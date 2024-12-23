@@ -54,8 +54,8 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(234, 25);
             this.textBox1.TabIndex = 0;
-            this.textBox1.Enter += new System.EventHandler(this.textBox1_Enter);
-            this.textBox1.Leave += new System.EventHandler(this.textBox1_Leave);
+            this.textBox1.Enter += new System.EventHandler(this.textBox1_Enter_1);
+            this.textBox1.Leave += new System.EventHandler(this.textBox1_Leave_1);
             // 
             // textBox2
             // 
@@ -64,8 +64,8 @@
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(234, 25);
             this.textBox2.TabIndex = 3;
-            this.textBox2.Enter += new System.EventHandler(this.textBox2_Enter);
-            this.textBox2.Leave += new System.EventHandler(this.textBox2_Leave);
+            this.textBox2.Enter += new System.EventHandler(this.textBox2_Enter_1);
+            this.textBox2.Leave += new System.EventHandler(this.textBox2_Leave_1);
             // 
             // pictureBox1
             // 
@@ -160,6 +160,7 @@
             this.Controls.Add(this.textBox1);
             this.DoubleBuffered = true;
             this.Name = "NewPasswordForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "NewPasswordForm";
             this.Load += new System.EventHandler(this.NewPasswordForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

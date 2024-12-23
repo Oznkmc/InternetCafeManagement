@@ -22,7 +22,7 @@ namespace InternetCafeManagement
         }
         public bool user_role { get; set; }
         public string user_mail { get; set; }
-        public double user_balance { get; set; }
+        public decimal user_balance { get; set; }
         public string secili_pc { get; set; }
         public int oturum_suresi { get; set; }
         private DateTime start_time { get; set; }
@@ -164,13 +164,12 @@ namespace InternetCafeManagement
                     }
                     else
                     {
-                        AnaSayfa anaSayfa = new AnaSayfa
-                        {
-                            user_role = user_role,
-                            user_balance = user_balance,
-                            user_mail = user_mail,
-                        };
-                        anaSayfa.Show();
+                        Sessions sessions = new Sessions();
+                        sessions.user_balance = user_balance;
+                        sessions.user_role = user_role;
+                        sessions.user_mail = user_mail;
+
+                        sessions.Show();
                         this.Hide();
                     }
                 }
@@ -307,29 +306,16 @@ namespace InternetCafeManagement
             if (saniye + (dakika * 60) + (saat * 3600) >= oturum_suresi)
             {
                 timer1.Stop();  // Zamanlayıcıyı durdur
-                DialogResult resultAna = MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor... Ana Sayfaya mı, Oturum Sayfasına mı Yönlendirilmek İstersiniz?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                DialogResult resultAna = MessageBox.Show("Oturum süreniz sona ermiştir. İşlemler tamamlanıyor... Oturum sayfasına mı yönlendirilmek istersiniz yoksa uygulamayı kapatmak mı?", "Uygulama Çıkışı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (resultAna == DialogResult.Yes)
                 {
-                    AnaSayfa ana = new AnaSayfa
-                    {
-                        user_mail = user_mail,
-                        user_balance = user_balance,
-                        user_role = user_role
-                    };
-                    ana.Show();
-                    this.Hide();
+                    
                     OturumuKapat(false); // Oturumu sonlandır
                 }
                 else if (resultAna==DialogResult.No)
                 {
 
-                    Sessions sessions = new Sessions();
-                    sessions.user_balance = user_balance;
-                    sessions.user_role = user_role;
-                    sessions.user_mail = user_mail;
-
-                    sessions.Show();
-                    this.Hide();
+                   
                     OturumuKapat(true); // Oturumu sonlandır
                 }
                

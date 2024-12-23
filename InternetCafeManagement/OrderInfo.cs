@@ -22,7 +22,7 @@ namespace InternetCafeManagement
         SqlDataAdapter da = new SqlDataAdapter();
         SqlCommand com = new SqlCommand();
         DataSet ds = new DataSet();
-        public double user_balance {  get; set; }
+        public decimal user_balance {  get; set; }
         public string user_mail { get; set; }
         string connectionString = "Data Source=DESKTOP-AGLHO45\\SQLEXPRESS;Initial Catalog=InternetCafeManagement;Integrated Security=True";
         void griddoldur()

@@ -48,57 +48,36 @@ namespace InternetCafeManagement
                 
             }
         }
-        private void ShowPlaceholderPass1()
+        private void SetPlaceholder(TextBox textBox, string placeholderText)
         {
-            // Eğer TextBox boşsa placeholder göster
-            if (string.IsNullOrEmpty(textBox1.Text))
+            if (string.IsNullOrEmpty(textBox.Text))
             {
-                textBox1.Text = "Şifre giriniz";
-                textBox1.ForeColor = Color.Gray; // Placeholder rengi
-                textBox1.UseSystemPasswordChar = false; // Maskeyi kapat
+                textBox.Text = placeholderText;
+                textBox.ForeColor = Color.Gray;
+                textBox.UseSystemPasswordChar = false; // Placeholder gösterildiğinde maske kapatılır
             }
         }
-        private void HidePlaceholderPass1()
+
+        private void RemovePlaceholder(TextBox textBox, string placeholderText)
         {
-            // Eğer placeholder görünüyorsa temizle
-            if (textBox1.Text == "Şifre giriniz")
+            if (textBox.Text == placeholderText)
             {
-                textBox1.Text = "";
-                textBox1.ForeColor = Color.Black; // Yazı rengini normal yap
-                textBox1.UseSystemPasswordChar = true; // Maskeyi aç
-            }
-        }
-        private void ShowPlaceholderPass2()
-        {
-            // Eğer TextBox boşsa placeholder göster
-            if (string.IsNullOrEmpty(textBox1.Text))
-            {
-                textBox2.Text = "Tekrar Şifre giriniz";
-                textBox2.ForeColor = Color.Gray; // Placeholder rengi
-                textBox2.UseSystemPasswordChar = false; // Maskeyi kapat
-            }
-        }
-        private void HidePlaceholderPass2()
-        {
-            // Eğer placeholder görünüyorsa temizle
-            if (textBox2.Text == "Tekrar Şifre giriniz")
-            {
-                textBox2.Text = "";
-                textBox2.ForeColor = Color.Black; // Yazı rengini normal yap
-                textBox2.UseSystemPasswordChar = true; // Maskeyi aç
+                textBox.Text = "";
+                textBox.ForeColor = Color.Black;
+                textBox.UseSystemPasswordChar = true; // Kullanıcı şifre yazmaya başlayınca maske açılır
             }
         }
         private void NewPasswordForm_Load(object sender, EventArgs e)
         {
-            textBox1.Enter += textBox1_Enter;
-            textBox1.Leave += textBox1_Leave;
-            textBox2.Enter += textBox2_Enter;
-            textBox2.Leave += textBox2_Leave;
-            ShowPlaceholderPass1();
-            HidePlaceholderPass1();
-            
-            ShowPlaceholderPass2();
-            HidePlaceholderPass2();
+            SetPlaceholder(textBox1, "Şifre giriniz");
+            SetPlaceholder(textBox2, "Tekrar Şifre giriniz");
+
+            // Placeholder Yönetimi için Olaylar
+            textBox1.Enter += (s, ev) => RemovePlaceholder(textBox1, "Şifre giriniz");
+            textBox1.Leave += (s, ev) => SetPlaceholder(textBox1, "Şifre giriniz");
+
+            textBox2.Enter += (s, ev) => RemovePlaceholder(textBox2, "Tekrar Şifre giriniz");
+            textBox2.Leave += (s, ev) => SetPlaceholder(textBox2, "Tekrar Şifre giriniz");
 
         }
 
@@ -125,49 +104,55 @@ namespace InternetCafeManagement
             }
            
         }
-
-        private void textBox1_Enter(object sender, EventArgs e)
-        {
-            HidePlaceholderPass1();
-        }
-
-        private void textBox1_Leave(object sender, EventArgs e)
-        {
-            ShowPlaceholderPass1();
-        }
-
-        private void textBox2_Leave(object sender, EventArgs e)
-        {
-            ShowPlaceholderPass2();
-        }
-
-        private void textBox2_Enter(object sender, EventArgs e)
-        {
-            HidePlaceholderPass2();
-        }
-
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            if (textBox1.UseSystemPasswordChar == true)
-            {
-                textBox1.UseSystemPasswordChar = false;
-            }
-            else
-            {
-                textBox1.UseSystemPasswordChar = true;
-            }
+            textBox1.UseSystemPasswordChar = !textBox1.UseSystemPasswordChar;
         }
 
         private void pictureBox5_Click(object sender, EventArgs e)
         {
-            if (textBox2.UseSystemPasswordChar == true)
-            {
-                textBox2.UseSystemPasswordChar = false;
-            }
-            else
-            {
-                textBox2.UseSystemPasswordChar = true;
-            }
+            textBox2.UseSystemPasswordChar = !textBox2.UseSystemPasswordChar;
+        }
+
+        ////private void textBox1_Enter(object sender, EventArgs e)
+        ////{
+        ////    HidePlaceholderPass1();
+        ////}
+
+        ////private void textBox1_Leave(object sender, EventArgs e)
+        ////{
+        ////    ShowPlaceholderPass1();
+        ////}
+
+        ////private void textBox2_Enter(object sender, EventArgs e)
+        ////{
+        ////    HidePlaceholderPass2();
+        ////}
+
+        ////private void textBox2_Leave(object sender, EventArgs e)
+        ////{
+        ////    ShowPlaceholderPass2();
+        //}
+        // textBox1 Enter ve Leave Olayları
+        private void textBox1_Enter(object sender, EventArgs e)
+        {
+            RemovePlaceholder(textBox1, "Şifre giriniz");
+        }
+
+        private void textBox1_Leave(object sender, EventArgs e)
+        {
+            SetPlaceholder(textBox1, "Şifre giriniz");
+        }
+
+        // textBox2 Enter ve Leave Olayları
+        private void textBox2_Enter(object sender, EventArgs e)
+        {
+            RemovePlaceholder(textBox2, "Tekrar Şifre giriniz");
+        }
+
+        private void textBox2_Leave(object sender, EventArgs e)
+        {
+            SetPlaceholder(textBox2, "Tekrar Şifre giriniz");
         }
 
         private void pictureBox6_Click(object sender, EventArgs e)
@@ -190,6 +175,26 @@ namespace InternetCafeManagement
             {
                 Application.Exit();
             }
+        }
+
+        private void textBox1_Enter_1(object sender, EventArgs e)
+        {
+            RemovePlaceholder(textBox1, "Şifre giriniz");
+        }
+
+        private void textBox1_Leave_1(object sender, EventArgs e)
+        {
+            SetPlaceholder(textBox1, "Şifre giriniz");
+        }
+
+        private void textBox2_Leave_1(object sender, EventArgs e)
+        {
+            SetPlaceholder(textBox2, "Tekrar Şifre giriniz");
+        }
+
+        private void textBox2_Enter_1(object sender, EventArgs e)
+        {
+            RemovePlaceholder(textBox2, "Tekrar Şifre giriniz");
         }
     }
 }

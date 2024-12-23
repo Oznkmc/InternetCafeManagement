@@ -20,7 +20,7 @@ namespace InternetCafeManagement
         }
         private int counter = 0;
         public string usermail {  get; set; }
-        public double user_balance { get; set; }
+        public decimal user_balance { get; set; }
         public bool user_rol {  get; set; }
         private void Wheel_Load(object sender, EventArgs e)
         {
@@ -165,10 +165,10 @@ namespace InternetCafeManagement
             hediyeler.Add("Oyuncu Mouse");
             hediyeler.Add("Mousepad");
             hediyeler.Add("USB bellek");
-            hediyeler.Add("Ülker çikolatalı gofret");
            
-            hediyeler.Add("Beypazarı Soda");
-            hediyeler.Add("Kutu Kola");
+           
+           
+            
             hediyeler.Add("1000 VP");
             hediyeler.Add("2050 VP");
             hediyeler.Add("5350 VP");

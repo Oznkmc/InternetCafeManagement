@@ -102,6 +102,7 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
             this.Name = "DogrulamaKodu";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "DogrulamaKodu";
             this.Load += new System.EventHandler(this.DogrulamaKodu_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).EndInit();

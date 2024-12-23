@@ -21,7 +21,7 @@ namespace InternetCafeManagement
 
         public bool user_role { get; set; }
         public string user_mail { get; set; }
-        public double user_balance { get; set; }
+        public decimal user_balance { get; set; }
         public string secili_pc {  get; set; }
         int parsedOturumSuresi;
         private void Sessions_Load(object sender, EventArgs e)
